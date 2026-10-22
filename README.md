@@ -21,7 +21,7 @@ windows. The whole month exports to CSV.
 ## Run it
 
 Open `docs/play/index.html` in a browser. That's the whole app — the engine
-(`docs/play/panchang.js`) and the shared runtime (`docs/play/web-kit.js`) sit
+(`docs/play/panchang.js`), the astronomy core (`docs/play/astro-kit.js`) and the shared runtime (`docs/play/web-kit.js`) sit
 next to it, so it works from `file://` and from GitHub Pages.
 
 ```
