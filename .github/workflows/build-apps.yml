@@ -1,24 +1,19 @@
-# Build (EXE + APK) AND deploy the live demo.
+# Build + release + deploy. One push, one pipeline, all from the same commit.
 #
 # SPDX-FileCopyrightText: 2026 Dr Sohil Momin
 # SPDX-License-Identifier: LicenseRef-Forge-Proprietary
 #
-# WHY THIS FILE WAS REWRITTEN
-# It used to be a hand-copied 4.9 kB inline version of the builder. That copy had
-# drifted: it still had `if: always()` on the release job - which DELETES the
-# existing release before creating a new one, so a failed build destroys the
-# published release - and it picked the EXE by a hard-coded filename. The shared
-# kit already fixed both. Inline copies cannot receive fixes, so this now CALLS
-# the shared workflow instead of duplicating it.
+# This file is intentionally tiny: the whole pipeline lives in the public
+# app-builder kit, so a fix there reaches every app at once. It used to be a
+# 4.9 kB hand-copied workflow, and the copies drifted - one of them kept a
+# conditional on the release job that DELETED the published release before
+# recreating it, so a failed build destroyed the release. Do not inline it again.
 #
-# It also deploys the demo. Nothing did before: the Pages workflow lived only in
-# the PRIVATE forge repo, and a public repo can only call a PUBLIC reusable
-# workflow - so no app demo could ever deploy. pages.yml is now published in the
-# public app-builder kit and is called below.
+# On every push to main: build the portable EXE and the signed APK, publish the
+# rolling `app-latest` release, then deploy the demo to Pages. All three come from
+# the same commit, so the live demo and the released build cannot disagree.
 #
-# DEPLOY IS FROM MAIN ONLY. A deploy from a pull_request would overwrite the live
-# site with unreviewed code, so PRs are built (and therefore checked) but never
-# deployed. A merged PR is a push to main, which deploys.
+# Pull requests build (and are therefore checked) but never release or deploy.
 
 name: Build + deploy
 
@@ -35,26 +30,17 @@ permissions:
   id-token: write
 
 concurrency:
-  group: build-panchang
+  group: build
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build EXE + APK
+  app:
     uses: drsamonline/app-builder/.github/workflows/build.yml@main
     with:
       app_name: panchang
       app_src: docs/play
+      deploy_path: docs
     permissions:
       contents: write
-
-  pages:
-    name: Deploy the demo to Pages
-    if: github.event_name != 'pull_request'
-    uses: drsamonline/app-builder/.github/workflows/pages.yml@main
-    with:
-      path: docs
-    permissions:
-      contents: read
       pages: write
       id-token: write
