@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0 — 2026-10-24
+
+- The demo now deploys automatically on every push, and each release carries a version and a changelog.
+
 ## 0.1.0 — 2026-10-23
 
 - First pass. Offline Panchang engine (`docs/play/panchang.js`): tithi, nakshatra,
