@@ -12,7 +12,7 @@
  * are therefore APPROXIMATE — do not present them as exact, and local tradition
  * may differ. Verified against the published Meeus worked examples.
  *
- * MIT License. (c) 2026 Dr Sohil Momin.
+ * PolyForm Noncommercial 1.0.0. (c) 2026 Dr Sohil Momin.
  */
 (function (root, factory) {
   var api = factory();
