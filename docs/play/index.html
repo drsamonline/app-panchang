@@ -207,5 +207,21 @@ window.__smokeTest = function () {
 };
 window.addEventListener("error", function () { window.__bootError = true; });
 </script>
+<style id="app-theme">
+  /* app-panchang - its own palette, type and shape.
+     Keyed on data-theme so the in-app theme toggle still works; !important is
+     required because web-kit sets these as inline styles on <html>. */
+  html[data-theme="dark"]{--bg:#150c0a !important;--card:#25110a !important;--ink:#fef3ee !important;--mut:#b67860 !important;--line:#3c1a0a !important;--acc:#f08750 !important;}
+  html[data-theme="light"]{--bg:#fef7f4 !important;--card:#ffffff !important;--ink:#261815 !important;--mut:#b85c30 !important;--line:#fce8dd !important;--acc:#c0480a !important;}
+  html,body{font-family:ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif !important;letter-spacing:0 !important;
+    background-image:radial-gradient(820px 360px at 50% -170px,
+      color-mix(in srgb, var(--acc) 16%, transparent), transparent 72%) !important;
+    background-repeat:no-repeat !important;background-attachment:fixed !important}
+  button,input,textarea,select{font-family:ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif !important}
+  button,.btn{border-radius:10px !important}
+  input,textarea,select{border-radius:8px !important}
+  .card,[class*="card"]{border-radius:12px !important}
+  button:not(.ghost):not(.tab){background:var(--acc) !important}
+</style>
 </body>
 </html>
