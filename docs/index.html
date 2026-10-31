@@ -3,53 +3,58 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Panchang — the daily Indian almanac, offline</title>
-<meta name="description" content="A daily Indian almanac: tithi, nakshatra, yoga, karana, rahu-kaal, sunrise and muhurat — computed on your device. No network, no accounts.">
-<meta property="og:title" content="Panchang — the daily Indian almanac">
-<meta property="og:description" content="Tithi, nakshatra, rahu-kaal and muhurat, computed offline on your device.">
+<title>Panchang — daily almanac</title>
+<meta name="description" content="Tithi, nakshatra, yoga, karana, rahu-kaal and muhurat — computed offline for your place.">
 <style>
-  :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e}
+  :root{--bg:#fdf8ee;--card:#fffdf8;--ink:#2a1f12;--dim:#7a6a52;
+        --line:#e8dcc4;--acc:#b45309;}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  main{max-width:760px;margin:0 auto;padding:32px 20px 60px}
-  h1{font-size:34px;margin:0 0 6px}
-  h2{font-size:17px;margin:34px 0 8px}
-  .mut{color:var(--mut)}
-  .cta{display:inline-block;background:var(--acc);color:#06210f;text-decoration:none;font-weight:700;border-radius:11px;padding:12px 18px;margin:16px 0}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:10px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
-  .card b{display:block;margin-bottom:3px}
-  footer{color:var(--mut);font-size:13px;margin-top:40px;border-top:1px solid var(--line);padding-top:16px}
-  a{color:var(--acc)}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-serif, Georgia, 'Iowan Old Style', serif;}
+  a{color:inherit}
+  .dl{display:flex;gap:9px;flex-wrap:wrap;margin:0}
+  .dl a{text-decoration:none;border:1px solid var(--line);border-radius:8px;
+        padding:10px 14px;font-size:13px;font-weight:600;background:var(--card);color:var(--ink)}
+  .dl a:hover{border-color:var(--acc);color:var(--acc)}
+  .dl small{display:block;font-weight:400;color:var(--dim);font-size:11px;margin-top:2px}
+  footer{margin-top:38px;padding-top:14px;border-top:1px solid var(--line);
+         color:var(--dim);font-size:12.5px}
+  footer a{color:var(--acc);text-decoration:none}
+
+  .alm{max-width:620px;margin:0 auto;padding:44px 24px 70px}
+  .crumb{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);text-decoration:none}
+  .head{display:flex;gap:16px;align-items:center;margin:24px 0 14px}
+  .mark{border-radius:14px}
+  .kicker{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);margin:0 0 4px}
+  h1{font-size:clamp(1.9rem,5vw,2.6rem);margin:0;letter-spacing:-.02em;font-weight:600}
+  .tag{font-size:1.05rem;color:var(--dim);margin:0 0 22px;line-height:1.6}
+  .go{display:inline-block;background:var(--acc);color:#fff;text-decoration:none;
+      padding:13px 22px;border-radius:8px;font-weight:700;font-size:15px}
+  .rows{margin:32px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+  .r{display:grid;grid-template-columns:150px 1fr;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .r:last-child{border-bottom:none}
+  .r span{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);font-weight:700}
+  .r p{margin:0;color:var(--dim);font-size:14px;line-height:1.6}
+  h2{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:34px 0 12px}
+  .note{color:var(--dim);font-size:13px;margin-top:20px;font-style:italic}
 </style>
 </head>
 <body>
-<main>
-  <h1>Panchang</h1>
-  <p class="mut">The daily Indian almanac — tithi, nakshatra, yoga, karana, rahu-kaal
-  and muhurat, computed on your device. Offline, no accounts, no telemetry.</p>
-  <a class="cta" href="./play/">Open the app &rarr;</a>
 
-  <h2>What you get</h2>
-  <div class="grid">
-    <div class="card"><b>Tithi &amp; paksha</b><span class="mut">Shukla/Krishna, Purnima, Amavasya.</span></div>
-    <div class="card"><b>Nakshatra, yoga, karana</b><span class="mut">The full five limbs of the day.</span></div>
-    <div class="card"><b>Sunrise, sunset, rahu-kaal</b><span class="mut">For your latitude and longitude.</span></div>
-    <div class="card"><b>Muhurat finder</b><span class="mut">The next auspicious windows.</span></div>
-    <div class="card"><b>Observances</b><span class="mut">Purnima, Amavasya, Ekadashi, Sankranti.</span></div>
-    <div class="card"><b>CSV export</b><span class="mut">The whole month, one tap.</span></div>
+<div class="alm">
+  <a class="crumb" href="https://drsamonline.github.io/">← all projects</a>
+  <div class="head">
+    <img class="mark" src="icon.png" alt="" width="56" height="56">
+    <div><p class="kicker">daily almanac</p><h1>Panchang</h1></div>
   </div>
-
-  <h2>How it works</h2>
-  <p class="mut">The solar and lunar positions are computed on-device (Meeus,
-  low-precision) with a Lahiri ayanamsa; sunrise and sunset use the standard
-  sunrise equation. It is a first pass — accurate to a few minutes near a
-  boundary. For ritual use, verify against a printed panchang for your city.</p>
-
-  <footer>
-    Built with <a href="https://github.com/drsamonline/forge">Forge</a> on the shared
-    <a href="https://drsamonline.github.io/web-kit/">web-kit</a>. MIT. © 2026 Dr Sohil Momin.
-  </footer>
-</main>
+  <p class="tag">Tithi, nakshatra, yoga, karana, rahu-kaal and muhurat — computed offline for your place.</p>
+  <div class="acts"><a class="go" href="play/">Open today →</a></div>
+  <div class="rows">
+    <div class="r"><span>Computed, not fetched</span><p>The almanac is calculated on the device from your coordinates.</p></div><div class="r"><span>No account</span><p>Nothing to sign into and nothing to send.</p></div><div class="r"><span>Every day, offline</span><p>Works with no connection once loaded.</p></div>
+  </div>
+  <h2>Install</h2>
+  <div class="dl"><a href="play/">Run it in the browser<small>no download needed</small></a></div>
+  <p class="note">Traditional panchang values; treat the muhurat timings as guidance, not prescription.</p>
+  <footer><a href="https://github.com/drsamonline/app-panchang">Source</a> · <a href="https://github.com/drsamonline/app-panchang/blob/main/LICENSE">Licence</a> · Dr. Sohil Momin</footer>
+</div>
 </body>
 </html>
