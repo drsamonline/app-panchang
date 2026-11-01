@@ -25,8 +25,8 @@
   button{background:var(--acc);color:#06210f;border:0;border-radius:10px;padding:9px 13px;font-weight:600;cursor:pointer}
   button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
   button.small{padding:5px 9px;font-size:12.5px;border-radius:8px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-  .grid.wide{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .tiles.wide{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 13px}
   .card .k{font-size:11.5px;color:var(--mut);letter-spacing:.03em}
   .card .v{font-size:18px;font-weight:650;margin-top:3px}
@@ -134,13 +134,13 @@
   </div>
 
   <h2 data-i18n="headLimbs">The five limbs, and when they change</h2>
-  <div id="limbs" class="grid wide"></div>
+  <div id="grid" class="tiles wide"></div>
 
   <h2 data-i18n="headTimes">The day's times</h2>
-  <div id="times" class="grid"></div>
+  <div id="times" class="tiles"></div>
 
   <h2 data-i18n="headWindows">Windows to avoid, and the one to keep</h2>
-  <div id="windows" class="grid"></div>
+  <div id="windows" class="tiles"></div>
 
   <h2 data-i18n="headChog">Choghadiya</h2>
   <div class="two">
@@ -152,7 +152,7 @@
   <div class="card"><div id="hora"></div></div>
 
   <h2 data-i18n="headMonth">The month, and the years</h2>
-  <div id="month" class="grid"></div>
+  <div id="month" class="tiles"></div>
 
   <h2 data-i18n="headFest">Festivals ahead</h2>
   <div class="card"><div id="festivals" class="muted">—</div></div>
@@ -160,7 +160,7 @@
   <h2 data-i18n="headMuhurat">Muhurat finder</h2>
   <p class="muted" style="margin:0 0 8px">A favourable tithi with a favourable nakshatra, no bhadra, in the next sixty days.</p>
   <button id="muhurat" class="noprint">Find muhurats</button>
-  <div id="muhurat-out" class="grid wide" style="margin-top:10px"></div>
+  <div id="muhurat-out" class="tiles wide" style="margin-top:10px"></div>
 
   <h2 data-i18n="headData">Data</h2>
   <div class="row noprint">
@@ -376,7 +376,7 @@
     $("obs").innerHTML = pills.join("");
 
     /* limbs with their windows */
-    fill("limbs", [
+    fill("grid", [
       card(t("tithi"), name("tithi", p.tithi.index), pkName(p.tithi.paksha) + " · " + window2(p.limbs.tithi)),
       card(t("nakshatra"), name("nakshatra", p.nakshatra.index), t("pada") + " " + num(p.nakshatra.pada) + " · " + window2(p.limbs.nakshatra)),
       card(t("yoga"), name("yoga", p.yoga.index), window2(p.limbs.yoga)),
