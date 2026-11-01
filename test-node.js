@@ -82,5 +82,59 @@ REF.forEach(function (r) {
   ok("muhurat dates are in the future", m.every(function (x) { return x.date >= new Date(2026, 9, 24); }));
 })();
 
+
+/* ---- 8. the page actually wires the engine up ----
+ * This is the bug that shipped once: astro-kit.js was split out of panchang.js
+ * and the script tag was never added, so panchang.js threw on load and the app
+ * rendered an empty day. A test on the page, not just the engine, catches it. */
+(function () {
+  var fs = require("fs"), path = require("path");
+  var dir = path.join(__dirname, "docs", "play");
+  var html = fs.readFileSync(path.join(dir, "index.html"), "utf8");
+  var srcs = [], m, re = /<script[^>]+src="([^"]+)"/g;
+  while ((m = re.exec(html))) srcs.push(m[1]);
+  ok("the page loads a script at all", srcs.length > 0, srcs.join(", "));
+  ok("every script the page loads exists", srcs.every(function (s) {
+    return fs.existsSync(path.join(dir, s));
+  }), srcs.join(", "));
+  ok("astro-kit is loaded before panchang",
+    srcs.indexOf("astro-kit.js") !== -1 && srcs.indexOf("astro-kit.js") < srcs.indexOf("panchang.js"),
+    srcs.join(" -> "));
+  ok("the service worker is registered", html.indexOf('navigator.serviceWorker.register("sw.js")') !== -1);
+  ok("the page links a manifest", /<link[^>]+rel="manifest"/.test(html));
+  ok("a build stamp is printed", html.indexOf('id="buildstamp"') !== -1);
+})();
+
+/* ---- 9. nothing is loaded from another origin ----
+ * The promise is "no network at runtime". A stray CDN font or an external
+ * badge would break it silently, so the shipped app is scanned for one. */
+(function () {
+  var fs = require("fs"), path = require("path");
+  var dir = path.join(__dirname, "docs", "play");
+  var offenders = [];
+  fs.readdirSync(dir).forEach(function (f) {
+    if (!/\.(html|js|webmanifest|css)$/.test(f)) return;
+    var text = fs.readFileSync(path.join(dir, f), "utf8");
+    var re = /(?:src|href)\s*=\s*["']https?:\/\/([^"'/]+)/g, m;
+    while ((m = re.exec(text))) offenders.push(f + " -> " + m[1]);
+    if (f !== "sw.js" && /\bfetch\s*\(\s*["']https?:/.test(text)) offenders.push(f + " -> fetch()");
+  });
+  ok("the app loads nothing from another origin", offenders.length === 0, offenders.join("; "));
+})();
+
+/* ---- 10. the offline shell covers every file the app needs ---- */
+(function () {
+  var fs = require("fs"), path = require("path");
+  var dir = path.join(__dirname, "docs", "play");
+  var sw = fs.readFileSync(path.join(dir, "sw.js"), "utf8");
+  ["web-kit.js", "astro-kit.js", "panchang.js", "index.html"].forEach(function (f) {
+    ok("sw.js precaches " + f, sw.indexOf(f) !== -1);
+  });
+  var v = JSON.parse(fs.readFileSync(path.join(dir, "manifest.webmanifest"), "utf8"));
+  ok("the manifest start_url is the app", v.start_url === "./" || v.start_url === "index.html", v.start_url);
+  ok("the manifest ships a maskable icon",
+    (v.icons || []).some(function (i) { return i.purpose === "maskable"; }));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

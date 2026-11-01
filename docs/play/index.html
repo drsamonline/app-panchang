@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Panchang — the daily Indian almanac</title>
 <meta name="description" content="An offline daily Panchang: tithi, nakshatra, yoga, karana, rahu-kaal, sunrise and muhurat — computed on your device, no network.">
+<meta name="theme-color" content="#150c0a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
   :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e}
   *{box-sizing:border-box}
@@ -72,10 +75,12 @@
 </main>
 <footer class="muted">
   Computed offline from your date and place. Method: Meeus low-precision solar &amp; lunar longitude, Lahiri ayanamsa — a first pass; verify against a printed panchang for ritual use.<br>
-  Built with Forge · © 2026 Dr Sohil Momin · no accounts, no network, no telemetry
+  Built with Forge · © 2026 Dr Sohil Momin · no accounts, no network, no telemetry<br>
+  <span id="buildstamp" class="muted"></span>
 </footer>
 
 <script src="web-kit.js"></script>
+<script src="astro-kit.js"></script>
 <script src="panchang.js"></script>
 <script>
 (function () {
@@ -118,6 +123,42 @@
     return c;
   }
 
+  /* A day is addressable: #d=2026-11-08&lat=19.076&lng=72.8777&tz=5.5&lang=gu&muhurat=1
+     makes the almanac linkable and shareable, and lets the landing page drive this
+     frame to a day worth seeing. Nothing here touches the network. */
+  function readHash() {
+    var h = (location.hash || "").replace(/^#/, "");
+    if (!h) return null;
+    var out = {};
+    h.split("&").forEach(function (kv) {
+      var i = kv.indexOf("=");
+      if (i < 0) { if (kv) out[kv] = "1"; return; }
+      out[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1));
+    });
+    return out;
+  }
+
+  function writeHash() {
+    var q = ["d=" + ($("date").value || ""),
+      "lat=" + $("lat").value, "lng=" + $("lng").value, "tz=" + $("tz").value];
+    if ($("lang").value !== "en") q.push("lang=" + $("lang").value);
+    try { history.replaceState(null, "", "#" + q.join("&")); } catch (e) { /* file:// in some browsers */ }
+  }
+
+  function applyHash(wantMuhurat) {
+    var h = readHash();
+    if (!h) return false;
+    if (h.d && /^\d{4}-\d{2}-\d{2}$/.test(h.d)) $("date").value = h.d;
+    ["lat", "lng", "tz"].forEach(function (k) {
+      if (h[k] !== undefined && isFinite(parseFloat(h[k]))) $(k).value = parseFloat(h[k]);
+    });
+    if (h.lang && $("lang").querySelector('option[value="' + h.lang + '"]')) {
+      $("lang").value = h.lang;
+      Loom.i18n.setLang(h.lang);
+    }
+    return wantMuhurat !== false && (h.muhurat === "1" || h.muhurat === "true");
+  }
+
   function render() {
     var parts = ($("date").value || localDateInput()).split("-");
     var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
@@ -143,6 +184,7 @@
     g.appendChild(card(Loom.i18n.t("sunset"), hhmm(p.sunset), "local time"));
     g.appendChild(card(Loom.i18n.t("rahu"), p.rahuKaal ? hhmm(p.rahuKaal.start) + "–" + hhmm(p.rahuKaal.end) : "—", "local time"));
     Loom.a11y.announce("Panchang for " + d.toDateString() + ": " + p.tithi.paksha + " " + p.tithi.name);
+    writeHash();
   }
 
   $("geo").addEventListener("click", function () {
@@ -184,7 +226,27 @@
     Loom.csv.download("panchang-" + y + "-" + mo + ".csv", Loom.csv.toCSV(rows));
   });
 
+  /* the build stamp — version, engine and the day it shipped */
+  try {
+    $("buildstamp").textContent = "build 0.1.2 · engine " + Panchang.version +
+      " · astro " + (window.Astro ? Astro.version : "—");
+  } catch (e) {}
+
+  /* a link into a day wins over the defaults; then the first paint */
+  var wantMuhurat = applyHash();
   render();
+  if (wantMuhurat) $("muhurat").click();
+
+  window.addEventListener("hashchange", function () {
+    if (applyHash()) { render(); $("muhurat").click(); } else { render(); }
+  });
+
+  /* offline: the HTML network-first, the assets cache-first, cache bumped per release */
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    navigator.serviceWorker.register("sw.js").then(function (reg) {
+      if (reg && reg.update) reg.update();
+    }).catch(function () { /* file:// or an unsupported browser: the app still works */ });
+  }
 })();
 </script>
 

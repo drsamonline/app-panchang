@@ -1,63 +1,116 @@
 # Panchang
 
+<p>
+  <a href="https://drsamonline.github.io/app-panchang/"><img alt="live: online" src="docs/assets/badge-live.svg"></a>
+  <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img alt="tests: 37 passing" src="docs/assets/badge-tests.svg"></a>
+  <a href="https://github.com/drsamonline/app-panchang/actions/workflows/build-apps.yml"><img alt="build: green" src="docs/assets/badge-build.svg"></a>
+  <a href="LICENSE"><img alt="licence: PolyForm NC 1.0.0" src="docs/assets/badge-licence.svg"></a>
+  <img alt="offline: no network" src="docs/assets/badge-offline.svg">
+  <img alt="deps: 0 runtime" src="docs/assets/badge-deps.svg">
+</p>
+
+**A daily Indian almanac that computes the day on your device.** Tithi, nakshatra, yoga,
+karana, vaara, sunrise, sunset, rahu-kaal and a muhurat finder — from the date and your
+place, with no network at any point.
+
+**[Open the app →](https://drsamonline.github.io/app-panchang/play/)** · [Landing page](https://drsamonline.github.io/app-panchang/) · [Method](#how-the-panchang-is-computed) · [Releases](https://github.com/drsamonline/app-panchang/releases)
+
 <!-- shot:start -->
 
 ![Screenshot](docs/shot.png)
 
 <!-- shot:end -->
 
-[![live](https://img.shields.io/badge/live-online-22c55e)](https://drsamonline.github.io/app-panchang/)
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-
-**A daily Indian almanac that runs entirely offline.** Tithi, nakshatra, yoga,
-karana, paksha, vaara, sunrise, sunset, rahu-kaal, and a muhurat finder — computed
-on your device from the date and your location. No accounts, no network, no
-telemetry.
-
-Built with **Forge** on the shared **web-kit** (storage, i18n, CSV, theme, a11y).
+The landing page is not a picture of the app — it embeds the real `docs/play/` in a
+frame and drives it to a day worth seeing. The almanac is three scripts, all in this
+repository: a shared runtime (`web-kit.js`), the astronomy core (`astro-kit.js`) and the
+app layer (`panchang.js`). No build step, no bundler, no package install, no server.
 
 ## What it does
 
-Pick a date and a place (or tap **Use my location**). The app computes the day's
-panchang: the tithi and its paksha, the nakshatra, yoga and karana, the sunrise
-and sunset, and the Rahu Kaal window. It flags the day's observances (Purnima,
-Amavasya, Ekadashi, Pradosh, Sankranti) and can list the next auspicious muhurat
-windows. The whole month exports to CSV.
-
-## Run it
-
-Open `docs/play/index.html` in a browser. That's the whole app — the engine
-(`docs/play/panchang.js`), the astronomy core (`docs/play/astro-kit.js`) and the shared runtime (`docs/play/web-kit.js`) sit
-next to it, so it works from `file://` and from GitHub Pages.
+Pick a date and a place, or tap **Use my location**. The app computes the five limbs of
+the day, the two sun times, the Rahu Kaal window and the day's observances, and can list
+the next auspicious muhurats or export the whole month as CSV. Every day is addressable,
+so a panchang can be linked or shared:
 
 ```
-node test-node.js      # 24 passed, 0 failed
+docs/play/index.html#d=2026-11-08&lat=19.0760&lng=72.8777&tz=5.5&lang=gu
 ```
+
+| | |
+|---|---|
+| headless assertions, `node test-node.js` | **37 passing, 0 failed** |
+| runtime dependencies | **0** — three in-repo scripts |
+| sun–moon elongation vs an independent ephemeris | **better than 0.05°** |
+| languages | **3** — English, हिन्दी, ગુજરાતી |
+| engine | `astro-kit.js` 0.1.0 + `panchang.js` 0.2.0 |
+
+## What it must not do, and does not
+
+- **No account, no profile, no sync.** There is nothing to sign into.
+- **No network at runtime.** A test scans every shipped file for a script, link or fetch
+  pointed at another origin and fails the build if one appears.
+- **No telemetry, analytics or error reporting.** Nothing leaves the device.
+- **No external font, icon or badge service.** Type is the system face; the badges are
+  drawn by `scripts/badges.py` and committed.
+- **No silent precision.** Lunar longitude from a reduced series puts a tithi or nakshatra
+  boundary within a few minutes of time, and local tradition differs on ayanamsa and on
+  where a day begins. Use it to plan, not to settle a dispute.
 
 ## How the panchang is computed
 
 Entirely on-device, from first principles:
 
-- the apparent **solar and lunar ecliptic longitudes** use the low-precision
-  method from Meeus, *Astronomical Algorithms* (ch. 25 & 47);
-- **tithi** and **karana** come from the moon–sun elongation; **nakshatra** and
-  **yoga** use a **Lahiri ayanamsa** (linear approximation);
-- **sunrise / sunset** use the standard sunrise equation; **rahu-kaal** is the
-  weekday's segment of the real sunrise-to-sunset day (so it is more accurate
-  than the fixed 6-to-6 tables).
+- apparent **solar and lunar ecliptic longitudes** by the low-precision method in Meeus,
+  *Astronomical Algorithms* (ch. 25 and 47);
+- **tithi** and **karana** from the moon–sun elongation; **nakshatra** and **yoga** from
+  the sidereal positions after a **Lahiri ayanamsa**;
+- **sunrise and sunset** from the standard sunrise equation; **rahu-kaal** as the
+  weekday's eighth of the real sunrise-to-sunset day, which is more accurate than the
+  fixed 6-to-6 tables;
+- **observances** (Purnima, Amavasya, Ekadashi, Pradosh, Sankranti) and a sixty-day
+  **muhurat** scan, both from the computed limbs.
 
-The engine is cross-checked against an independent ephemeris in `test-node.js`:
-elongations agree to better than 0.05°, and sunrise/sunset to within a few
-minutes. This is a **first pass** — accurate to a few minutes near a
-tithi/nakshatra boundary. For ritual-critical use, verify against a printed
-panchang for your city.
+`test-node.js` checks six elongations, the March equinox, Mumbai's sunrise and sunset,
+Holi and Diwali, the karana table's wrap-around, the muhurat finder, the page's own script
+wiring and the offline guard.
 
-## Build the EXE and APK
+## Run it
 
-This repo calls the shared build workflow. On every push, GitHub Actions builds a
-portable Windows EXE and a signed Android APK from `docs/play` and attaches them
-to the `app-latest` release.
+```bash
+open docs/play/index.html      # the whole app, no install
+node test-node.js              # 37 passed, 0 failed
+```
+
+## Download it
+
+Every push builds the binaries from the same commit as the demo and attaches them to the
+rolling `app-latest` release; tagged releases carry the same assets with the changelog.
+The app icon is [here](docs/play/icon-512.png) and ships inside both builds.
+
+| | | |
+|---|---|---|
+| <img src="docs/play/icon-192.png" width="28" alt=""> | **Windows** | `panchang-portable.exe` — no installer, no registry writes |
+| <img src="docs/play/icon-192.png" width="28" alt=""> | **Android** | `panchang.apk` — signed, sideload; no store |
+| <img src="docs/play/icon-192.png" width="28" alt=""> | **Linux** | `panchang-linux` — `chmod +x` and run |
+
+## Layout
+
+```
+docs/index.html              the landing page — night sky, gold, its own design
+docs/play/index.html         the app
+docs/play/astro-kit.js       astronomy core (shared)
+docs/play/panchang.js        the app's own layer: vaara, rahu-kaal, observances, muhurat
+docs/play/web-kit.js         the shared runtime: storage, i18n, CSV, theme, a11y
+docs/play/sw.js              offline shell — HTML network-first, assets cache-first
+docs/play/manifest.webmanifest
+docs/assets/                 screenshots and generated badges
+scripts/badges.py            draws the badges locally
+scripts/shot.py              screenshots the landing page and the app
+ENHANCEMENTS.md              what is worth doing next, and what it would cost
+```
 
 ## Licence
 
-MIT. (c) 2026 Dr Sohil Momin. Part of the Forge system — apps open, orchestrator licensed.
+PolyForm Noncommercial 1.0.0 — see `LICENSE`. © 2026 Dr Sohil Momin. Part of the Forge
+system: apps open, orchestrator licensed.

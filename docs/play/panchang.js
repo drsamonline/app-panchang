@@ -5,7 +5,7 @@
  * keeps only what is specific to this app: vaara, rahu-kaal, the day's
  * observances, and the muhurat finder.
  *
- * Part of the Forge system. MIT License. (c) 2026 Dr Sohil Momin.
+ * Part of the Forge system. PolyForm Noncommercial 1.0.0. (c) 2026 Dr Sohil Momin.
  * Works in the browser (window.Panchang) and in Node (module.exports).
  */
 (function (root, factory) {
