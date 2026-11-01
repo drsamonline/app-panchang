@@ -524,5 +524,42 @@ REF.forEach(function (r) {
     enKeys.every(function (k) { return keys.hi[k] && keys.gu[k]; }));
 })();
 
+/* ---- 28. the record of what shipped is true ----
+ * The assets are cache-busted by VERSION. Nothing else makes a release change
+ * the URL, so a commit that edits a shipped file and forgets VERSION would ship
+ * the new page beside the old engine out of a cache. BUILD.json is the record;
+ * this checks it still describes the tree, and scripts/stamp.js refuses to write
+ * it without a bump.
+ */
+(function () {
+  var root = __dirname;
+  var version = fs.readFileSync(path.join(root, "VERSION"), "utf8").trim();
+  var recordPath = path.join(root, "BUILD.json");
+  ok("BUILD.json exists", fs.existsSync(recordPath));
+  if (!fs.existsSync(recordPath)) return;
+
+  var record = JSON.parse(fs.readFileSync(recordPath, "utf8"));
+  ok("the record is for this version", record.version === version,
+    record.version + " recorded, " + version + " in VERSION");
+
+  var crypto = require("crypto"), drift = [], gone = [];
+  Object.keys(record.files || {}).forEach(function (f) {
+    var full = path.join(root, f);
+    if (!fs.existsSync(full)) { gone.push(f); return; }
+    var h = crypto.createHash("sha256").update(fs.readFileSync(full)).digest("hex");
+    if (h !== record.files[f]) drift.push(f);
+  });
+  ok("no shipped file changed since it was stamped", drift.length === 0,
+    drift.join(" ") + " — bump VERSION and run scripts/stamp.js");
+  ok("no recorded file has gone missing", gone.length === 0, gone.join(" "));
+
+  /* every script the app loads has to be in the record, or the guard has a hole */
+  var html = fs.readFileSync(path.join(root, "docs", "play", "index.html"), "utf8");
+  var srcs = [], m, re = /<script[^>]+src="([^"]+)"/g;
+  while ((m = re.exec(html))) srcs.push(m[1].split("?")[0]);
+  var unrecorded = srcs.filter(function (s) { return !record.files["docs/play/" + s]; });
+  ok("every script the app loads is in the record", unrecorded.length === 0, unrecorded.join(" "));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

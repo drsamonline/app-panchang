@@ -238,7 +238,7 @@ footer .fnote{max-width:36em;line-height:1.6}
       </div>
       <div class="badges">
         <a href="https://drsamonline.github.io/app-panchang/"><img src="assets/badge-live.svg" alt="live: online" width="98" height="20"></a>
-        <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img src="assets/badge-tests.svg" alt="tests: 199 passing" width="137" height="20"></a>
+        <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img src="assets/badge-tests.svg" alt="tests: 204 passing" width="137" height="20"></a>
         <a href="https://github.com/drsamonline/app-panchang/actions/workflows/build-apps.yml"><img src="assets/badge-build.svg" alt="build: green" width="98" height="20"></a>
         <a href="https://github.com/drsamonline/app-panchang/blob/main/LICENSE"><img src="assets/badge-licence.svg" alt="licence: PolyForm NC 1.0.0" width="190" height="20"></a>
         <img src="assets/badge-offline.svg" alt="offline: no network" width="144" height="20">
@@ -343,7 +343,7 @@ footer .fnote{max-width:36em;line-height:1.6}
 <section class="band tight">
   <div class="wrap">
     <div class="stats">
-      <div class="stat"><b>199</b><span>headless assertions — the astronomy against an independent ephemeris, a 1000-day sweep, four published eclipses, and the page itself</span></div>
+      <div class="stat"><b>204</b><span>headless assertions — the astronomy against an independent ephemeris, a 1000-day sweep, four published eclipses, and the page itself</span></div>
       <div class="stat"><b>0</b><span>runtime dependencies — two in-repo scripts, and no package manager at all</span></div>
       <div class="stat"><b>0.05°</b><span>agreement on sun–moon elongation; sunrise and sunset within a few minutes</span></div>
       <div class="stat"><b>3</b><span>languages — English, Hindi and Gujarati, with the tithi and nakshatra names in their own scripts, not just the headings</span></div>
@@ -364,7 +364,7 @@ footer .fnote{max-width:36em;line-height:1.6}
           <li><b>Longitudes.</b> Apparent solar and lunar longitude from Meeus, <em>Astronomical Algorithms</em> (ch. 25 and 47) — the moon with its E-factor, the additive planetary terms and its latitude, and ΔT so the series are given TT while the app takes UT.</li>
           <li><b>Limbs and their boundaries.</b> Tithi and karana from the elongation, nakshatra and yoga from the sidereal positions after a Lahiri ayanamsa — then a bisection on each angle to find the minute it changes.</li>
           <li><b>Rise and set.</b> The standard sunrise equation for your latitude and longitude, then Rahu Kaal as the weekday’s segment of that real day.</li>
-          <li><b>Evidence.</b> 199 assertions: six elongations against an independent ephemeris, a 1000-day sweep, polar latitudes, daylight saving in Sydney and London, four published eclipses, ten festivals against their conventional dates, and an offline render check in a real browser.</li>
+          <li><b>Evidence.</b> 204 assertions: six elongations against an independent ephemeris, a 1000-day sweep, polar latitudes, daylight saving in Sydney and London, four published eclipses, ten festivals against their conventional dates, and an offline render check in a real browser.</li>
         </ol>
         <p class="note" style="margin-top:18px"><b>Read this before you rely on it.</b> Lunar longitude from a reduced series puts a tithi or nakshatra boundary within a few minutes of time, and local tradition differs on ayanamsa and on where a day begins. Use it to plan, not to settle a dispute; verify against a printed panchang for your city.</p>
       </div>
@@ -385,7 +385,7 @@ open docs/play/index.html
 
 <span class="c"># the engine's tests</span>
 node test-node.js
-<span class="g">199 passed, 0 failed</span></pre>
+<span class="g">204 passed, 0 failed</span></pre>
         <p class="dim" style="font-size:13.5px">Works from <code>file://</code>, from a local server, and from GitHub Pages. No build step, no bundler, no package install.</p>
       </div>
       <div class="dl">
@@ -426,13 +426,13 @@ node test-node.js
   </div>
 </footer>
 
-<script src="play/panchang.js?v=0.2.1"></script>
+<script src="play/panchang.js?v=0.2.2"></script>
 <script>
 (function () {
   "use strict";
 
   /* ---------- build stamp: “am I on the new one?” answerable from the page ---------- */
-  var BUILD = "0.2.1 · 2026-11-01";
+  var BUILD = "0.2.2 · 2026-11-01";
   document.getElementById("stamp").textContent = "build " + BUILD + " · landing page";
 
   /* ---------- theme: base light, system preference first, toggle overrides ---------- */

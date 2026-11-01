@@ -6,7 +6,7 @@
 <title>Panchang — the daily Indian almanac</title>
 <meta name="description" content="An offline daily Panchang: tithi, nakshatra, yoga, karana with the times they change, sunrise and sunset, moonrise, rahu-kaal, choghadiya, hora, samvat and muhurat — computed on your device, no network.">
 <meta name="theme-color" content="#150c0a">
-<link rel="manifest" href="manifest.webmanifest?v=0.2.1">
+<link rel="manifest" href="manifest.webmanifest?v=0.2.2">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
   :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e;--warn:#e0a33e;--bad:#e07a5f}
@@ -187,11 +187,11 @@
 <div id="loom-live" class="sr-only" aria-live="polite" style="position:absolute;left:-9999px"></div>
 <input type="file" id="filein" accept="application/json" hidden>
 
-<script src="web-kit.js?v=0.2.1"></script>
-<script src="data/names.js?v=0.2.1"></script>
-<script src="data/cities.js?v=0.2.1"></script>
-<script src="data/festivals.js?v=0.2.1"></script>
-<script src="panchang.js?v=0.2.1"></script>
+<script src="web-kit.js?v=0.2.2"></script>
+<script src="data/names.js?v=0.2.2"></script>
+<script src="data/cities.js?v=0.2.2"></script>
+<script src="data/festivals.js?v=0.2.2"></script>
+<script src="panchang.js?v=0.2.2"></script>
 <script>
 (function () {
   "use strict";
@@ -264,7 +264,7 @@
   }
 
   /* ---------- state ---------- */
-  var APP_VERSION = "0.2.1";
+  var APP_VERSION = "0.2.2";
   var state = {
     date: null, lat: 19.0760, lng: 72.8777, zone: "Asia/Kolkata", tz: 5.5,
     at: "noon", scale: "md", contrast: ""
@@ -793,7 +793,7 @@
     showStale(missing);
   } else {
     try {
-      $("buildstamp").textContent = "build 0.2.1 · engine " + Panchang.version +
+      $("buildstamp").textContent = "build 0.2.2 · engine " + Panchang.version +
         " · " + CITIES.length + " cities bundled";
     } catch (e) {}
     try { render(); }

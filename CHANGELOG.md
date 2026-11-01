@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.2.2 — 2026-11-01
+
+No behaviour change. The build now refuses the bug 0.2.1 was about.
+
+### The version tag was a promise, not a check
+
+0.2.1 fixed the frozen page by tagging every asset with `?v=<VERSION>`, which only works if
+VERSION moves whenever a shipped file does. Nothing enforced that. A commit could edit
+`panchang.js`, leave VERSION alone, pass every test, and hand a returning reader the new page
+beside the old engine out of a cache — the exact failure 0.2.1 was written to end.
+
+- **`scripts/stamp.js`** records the SHA-256 of every file a browser can fetch — the app, its
+  data, the worker, the manifest, all six icons and the landing page — in a committed
+  `BUILD.json`. If one of them has changed while VERSION has not, it **refuses to write** and
+  says which file moved and why it matters. `--check` verifies without writing.
+- **`test-node.js` checks the record** in-process, so CI refuses the same thing without an extra
+  workflow step: the record is for this VERSION, no shipped file has drifted since it was
+  written, no recorded file has gone, and every script the app loads is in the record — that
+  last one so the guard has no hole to slip through.
+
+Proven both ways before shipping: editing `panchang.js` with the version left alone is refused,
+`--check` reports the drift, and restoring the file makes the record current again.
+
+### Also
+
+- `204 assertions`.
+- The record covers the landing page as well as the app, since the landing page loads the
+  engine and carries its own build stamp.
+
 ## 0.2.1 — 2026-11-01
 
 ### The language selector did nothing

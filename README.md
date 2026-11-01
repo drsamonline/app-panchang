@@ -2,7 +2,7 @@
 
 <p>
   <a href="https://drsamonline.github.io/app-panchang/"><img alt="live: online" src="docs/assets/badge-live.svg"></a>
-  <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img alt="tests: 199 passing" src="docs/assets/badge-tests.svg"></a>
+  <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img alt="tests: 204 passing" src="docs/assets/badge-tests.svg"></a>
   <a href="https://github.com/drsamonline/app-panchang/actions/workflows/build-apps.yml"><img alt="build: green" src="docs/assets/badge-build.svg"></a>
   <a href="LICENSE"><img alt="licence: PolyForm NC 1.0.0" src="docs/assets/badge-licence.svg"></a>
   <img alt="offline: no network" src="docs/assets/badge-offline.svg">
@@ -46,7 +46,7 @@ Every day is addressable, so a panchang can be linked or shared:
 
 | | |
 |---|---|
-| headless assertions, `node test-node.js` | **199 passing, 0 failed** |
+| headless assertions, `node test-node.js` | **204 passing, 0 failed** |
 | runtime dependencies | **0** — two in-repo scripts and three data files |
 | sun–moon elongation vs an independent ephemeris | **better than 0.05°** |
 | limb boundary accuracy | **a minute or two**, stated rather than hidden |
@@ -106,8 +106,9 @@ unresolvable and looks for the day's tithi in the DOM.
 
 ```bash
 open docs/play/index.html      # the whole app, no install
-node test-node.js              # 199 passed, 0 failed
+node test-node.js              # 204 passed, 0 failed
 node scripts/offline-check.js  # renders with no network (skips if no browser)
+node scripts/stamp.js          # after a VERSION bump: record what shipped
 ```
 
 ## Download it
@@ -139,6 +140,8 @@ scripts/badges.py            draws the badges, reading the count from the suite
 scripts/icons.py             renders every icon size from the SVG master
 scripts/shot.py              screenshots the landing page and the app
 scripts/offline-check.js     renders the app with no network, in a real browser
+scripts/stamp.js             records what shipped in BUILD.json, and refuses a stale tag
+BUILD.json                   the SHA-256 of every file a browser can fetch
 ENHANCEMENTS.md              what is worth doing next, and what it would cost
 ```
 
