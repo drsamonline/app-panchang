@@ -7,11 +7,13 @@ they render on GitHub Pages, in the README and from `file://` with no network.
 
   python3 scripts/badges.py
 
-Every claim below is checked against the repo: the assertion count is what
-`node test-node.js` prints, the licence is what LICENSE says, and the app
-ships no runtime dependency (three script tags, all in-repo).
+Every claim below is checked against the repo: the assertion count is read out
+of `node test-node.js` when this runs, the licence is what LICENSE says, and the
+app ships no runtime dependency (two in-repo scripts and three data files).
 """
 import os
+import re
+import subprocess
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "docs", "assets")
@@ -24,9 +26,23 @@ JADE = "#2c6b52"
 STEEL = "#33567f"
 INK = "#0f1522"
 
+def passing():
+    """The number the suite actually prints, so a badge cannot claim a count the
+    tests do not produce. Falls back to a word if the suite cannot be run."""
+    try:
+        out = subprocess.run(["node", os.path.join(ROOT, "test-node.js")],
+                             capture_output=True, text=True, timeout=300).stdout
+        m = re.search(r"(\d+) passed, (\d+) failed", out)
+        if m and m.group(2) == "0":
+            return m.group(1) + " passing"
+    except Exception:
+        pass
+    return "unrun"
+
+
 BADGES = [
     ("live", "live", "online", STEEL),
-    ("tests", "tests", "37 passing", JADE),
+    ("tests", "tests", passing(), JADE),
     ("build", "build", "green", JADE),
     ("licence", "licence", "PolyForm NC 1.0.0", GOLD),
     ("offline", "offline", "no network", NIGHT),

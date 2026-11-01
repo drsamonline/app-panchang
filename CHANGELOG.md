@@ -1,5 +1,107 @@
 # Changelog
 
+## 0.2.0 — 2026-11-01
+
+The enhancement list in `ENHANCEMENTS.md`, worked through. The app went from "which tithi is
+today" to "the tithi changes at 14:52", and the almanac around it filled in.
+
+### The five limbs now say when they turn
+
+The biggest change, and the one that made the rest possible. The elongation and the sidereal
+positions are smooth functions of time, so a boundary is a root: the angle travelled since the
+last boundary divided by the mean rate puts you within minutes of it, and one bisection settles
+it to a second. Every limb now carries a `start` and an `end`, and the app prints them under the
+name. The muhurat finder gets better for the same reason — it can now avoid a bhadra window
+rather than a whole day.
+
+### Accuracy
+
+- **ΔT** (Espenak–Meeus) is applied, so the series are given TT while the API takes UT.
+- The moon gained its **E-factor**, the **additive planetary terms** (A1, A2) and its **latitude**
+  from the largest ch. 47 terms — the latitude is what makes moonrise and moonset possible.
+- **Ayanamsa** is now Lahiri advanced by general precession from its J2000 value, instead of a
+  bare linear term.
+- **Sunrise and sunset** take an altitude and the standard refraction; **civil twilight** comes
+  with them.
+- **Moonrise and moonset** by sampling the moon's altitude through GMST and bisecting the
+  crossings.
+- The day can be **read at sunrise** instead of noon — the traditional reckoning — as a setting,
+  because traditions differ and the app should not choose silently.
+
+### Two real bugs the work exposed
+
+- `compute()` was handing the rise/set routines a *timezone-shifted* date, so they searched the
+  wrong UTC day and sunrise landed ~18 hours out. The public `sunTimes()` was correct, which is
+  why the tests never caught it; the app's own numbers were wrong. It now anchors on the UTC
+  midnight of the local date.
+- The eclipse test measured the distance to one node instead of the nearer one, so it missed every
+  eclipse and flagged a whole week around each syzygy. It now tests both nodes at the syzygy
+  instant, and only on the day the syzygy falls. It reproduces all four 2026 eclipses.
+
+### The rest of the almanac
+
+Gulika Kaal, Yamaganda and Abhijit; day and night **choghadiya**; the twenty-four **hora**; the
+lunar month in **amanta and purnimanta** reckoning; **Vikram and Shaka Samvat** and the
+samvatsara; the season and ayana; the sun's and moon's **rashi**; moon phase and illumination;
+**bhadra**; an **eclipse** flag; and **festivals resolved from tithi rules** rather than a table of
+dates that goes stale.
+
+### A place, without typing coordinates
+
+**118 cities** bundled as a data file, each with an IANA zone, so the offset comes from
+`Intl.DateTimeFormat` for the chosen date and daylight saving is right. "Use my location" snaps to
+the nearest bundled city, because offline reverse geocoding is not possible without a dataset this
+app should not carry. Eight places can be saved.
+
+### Data in and out
+
+**CSV** for the month (now with the end times), **ICS** for festivals and muhurats into whatever
+calendar is on the phone, **JSON** for settings and saved places, and a **print stylesheet** for a
+day on paper.
+
+### Languages: the values, not just the labels
+
+`docs/play/data/names.js` carries the tithi, nakshatra, yoga, karana, vaara, masa, rashi, ritu,
+choghadiya and hora names in Devanagari and Gujarati, so the heading and the value agree. Native
+digits are an option. Samvatsara names stay in Latin in all three languages rather than being
+guessed at in two scripts.
+
+### Accessibility
+
+Landmarks, a live region, a high-contrast theme, two larger text sizes, and a print view that
+drops the controls.
+
+### Tests: 37 → 182
+
+Including a 1000-day sweep, polar latitudes (Tromsø in both solstices), daylight saving in Sydney
+and London, a golden baseline that fails on a two-minute drift, four published eclipses, ten
+festivals against their conventional 2026 dates, the choghadiya and hora weekday tables, the names
+tables, the city list, a licence-agreement check, and the page's own wiring.
+
+### Guardrails
+
+- `scripts/offline-check.js` renders the app in Chromium with **every host unresolvable** and looks
+  for the day's tithi in the DOM — the offline promise, tested end to end rather than asserted.
+  It is a CI step now.
+- `scripts/badges.py` runs the suite and takes the count from its output, so a badge cannot claim a
+  number the tests do not print.
+- `scripts/icons.py` renders every icon size from the one SVG master — 192, 512, maskable, a
+  Windows `.ico`, and the Android adaptive foreground and background.
+
+### What is still not done, and why
+
+Three items on the list were left alone deliberately, because doing them would have meant
+guessing:
+
+- **the remaining 33 terms of Meeus ch. 47.** The reduced series is good to about 0.05°; the rest
+  would take it to 0.01°. The coefficients cannot be verified here, and a fabricated table would
+  be worse than a documented limit.
+- **durmuhurtam.** It is a per-weekday table, and the copies in circulation disagree. Wrong ritual
+  timings are worse than absent ones.
+- **named Ekadashis and a longer festival list.** Both need the lunar month to be right in every
+  case, and the ten festivals shipped are the ones whose rules reproduce their conventional 2026
+  dates. The engine takes more rules; the table should grow only with dates someone can check.
+
 ## 0.1.2 — 2026-11-01
 
 ### The demo was empty, and nobody could see it

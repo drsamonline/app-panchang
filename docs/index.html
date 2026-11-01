@@ -238,7 +238,7 @@ footer .fnote{max-width:36em;line-height:1.6}
       </div>
       <div class="badges">
         <a href="https://drsamonline.github.io/app-panchang/"><img src="assets/badge-live.svg" alt="live: online" width="98" height="20"></a>
-        <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img src="assets/badge-tests.svg" alt="tests: 37 passing" width="131" height="20"></a>
+        <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img src="assets/badge-tests.svg" alt="tests: 182 passing" width="137" height="20"></a>
         <a href="https://github.com/drsamonline/app-panchang/actions/workflows/build-apps.yml"><img src="assets/badge-build.svg" alt="build: green" width="98" height="20"></a>
         <a href="https://github.com/drsamonline/app-panchang/blob/main/LICENSE"><img src="assets/badge-licence.svg" alt="licence: PolyForm NC 1.0.0" width="190" height="20"></a>
         <img src="assets/badge-offline.svg" alt="offline: no network" width="144" height="20">
@@ -306,18 +306,18 @@ footer .fnote{max-width:36em;line-height:1.6}
     <div class="cards">
       <article class="card">
         <p class="n">01</p>
-        <h3>The five limbs</h3>
-        <p>Tithi and its paksha, nakshatra, yoga, karana and vaara — the classical <em>panchanga</em>, taken from the moon–sun elongation and a Lahiri ayanamsa rather than from a table of dates.</p>
+        <h3>The five limbs, and when they turn</h3>
+        <p>Tithi, nakshatra, yoga, karana and vaara — and the <strong>time each one changes</strong>, found by bisecting the elongation rather than read off a table. A tithi that ends at 14:52 tells you that.</p>
       </article>
       <article class="card">
         <p class="n">02</p>
         <h3>The hours of the day</h3>
-        <p>Sunrise and sunset from the standard sunrise equation, and Rahu Kaal measured as the weekday’s eighth of the <em>real</em> sunrise-to-sunset day — not the fixed 6-to-6 tables, which drift an hour out at the solstices.</p>
+        <p>Sunrise and sunset, moonrise and moonset, Rahu Kaal, Gulika, Yamaganda and Abhijit — all measured against the <em>real</em> sunrise-to-sunset day, plus the day and night choghadiya and the twenty-four hora.</p>
       </article>
       <article class="card">
         <p class="n">03</p>
-        <h3>Days ahead, and a month out</h3>
-        <p>The muhurat finder scans sixty days for a favourable tithi with a favourable nakshatra; the whole month exports to CSV. Both work with the network switched off.</p>
+        <h3>The month, the years, and the days ahead</h3>
+        <p>The lunar month in both reckonings, Vikram and Shaka Samvat, the samvatsara, the season and the sun and moon signs — then festivals resolved from their tithi rules, a muhurat finder, and CSV, ICS and JSON out.</p>
       </article>
     </div>
   </div>
@@ -334,7 +334,7 @@ footer .fnote{max-width:36em;line-height:1.6}
       <div><b>×</b><span><strong>No network at runtime.</strong> Two scripts, both in this repository. Open it from a USB stick.</span></div>
       <div><b>×</b><span><strong>No telemetry, no analytics, no error reporting.</strong> Nothing leaves the device.</span></div>
       <div><b>×</b><span><strong>No external font, icon or badge service.</strong> Type is the system face; badges are drawn in this repo.</span></div>
-      <div><b>×</b><span><strong>No silent precision.</strong> It says “a first pass, a few minutes” and tells you to check a printed panchang for ritual use.</span></div>
+      <div><b>×</b><span><strong>No silent precision.</strong> It says a minute or two at a boundary, names the ayanamsa, and tells you to check a printed panchang for ritual use.</span></div>
       <div><b>×</b><span><strong>No server, no database, no build step.</strong> The app is static files; the tests run on Node.</span></div>
     </div>
   </div>
@@ -343,10 +343,10 @@ footer .fnote{max-width:36em;line-height:1.6}
 <section class="band tight">
   <div class="wrap">
     <div class="stats">
-      <div class="stat"><b>37</b><span>headless assertions — engine against an independent ephemeris, plus the page wiring and an offline guard</span></div>
+      <div class="stat"><b>182</b><span>headless assertions — the astronomy against an independent ephemeris, a 1000-day sweep, four published eclipses, and the page itself</span></div>
       <div class="stat"><b>0</b><span>runtime dependencies — two in-repo scripts, and no package manager at all</span></div>
       <div class="stat"><b>0.05°</b><span>agreement on sun–moon elongation; sunrise and sunset within a few minutes</span></div>
-      <div class="stat"><b>3</b><span>languages — English, Hindi and Gujarati, in their own scripts, switchable in the app</span></div>
+      <div class="stat"><b>3</b><span>languages — English, Hindi and Gujarati, with the tithi and nakshatra names in their own scripts, not just the headings</span></div>
     </div>
   </div>
 </section>
@@ -361,10 +361,10 @@ footer .fnote{max-width:36em;line-height:1.6}
       </div>
       <div>
         <ol>
-          <li><b>Longitudes.</b> Apparent solar and lunar ecliptic longitude by the low-precision method in Meeus, <em>Astronomical Algorithms</em> (ch. 25 and 47).</li>
-          <li><b>Limbs.</b> Tithi and karana from the moon–sun elongation; nakshatra and yoga from the sidereal positions after a Lahiri ayanamsa.</li>
+          <li><b>Longitudes.</b> Apparent solar and lunar longitude from Meeus, <em>Astronomical Algorithms</em> (ch. 25 and 47) — the moon with its E-factor, the additive planetary terms and its latitude, and ΔT so the series are given TT while the app takes UT.</li>
+          <li><b>Limbs and their boundaries.</b> Tithi and karana from the elongation, nakshatra and yoga from the sidereal positions after a Lahiri ayanamsa — then a bisection on each angle to find the minute it changes.</li>
           <li><b>Rise and set.</b> The standard sunrise equation for your latitude and longitude, then Rahu Kaal as the weekday’s segment of that real day.</li>
-          <li><b>Evidence.</b> <code>test-node.js</code> checks six elongations, the March equinox, Mumbai’s sunrise and sunset, Holi and Diwali, the karana table’s wrap-around, and the muhurat finder.</li>
+          <li><b>Evidence.</b> 182 assertions: six elongations against an independent ephemeris, a 1000-day sweep, polar latitudes, daylight saving in Sydney and London, four published eclipses, ten festivals against their conventional dates, and an offline render check in a real browser.</li>
         </ol>
         <p class="note" style="margin-top:18px"><b>Read this before you rely on it.</b> Lunar longitude from a reduced series puts a tithi or nakshatra boundary within a few minutes of time, and local tradition differs on ayanamsa and on where a day begins. Use it to plan, not to settle a dispute; verify against a printed panchang for your city.</p>
       </div>
@@ -385,7 +385,7 @@ open docs/play/index.html
 
 <span class="c"># the engine's tests</span>
 node test-node.js
-<span class="g">37 passed, 0 failed</span></pre>
+<span class="g">182 passed, 0 failed</span></pre>
         <p class="dim" style="font-size:13.5px">Works from <code>file://</code>, from a local server, and from GitHub Pages. No build step, no bundler, no package install.</p>
       </div>
       <div class="dl">

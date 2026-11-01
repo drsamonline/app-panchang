@@ -4,127 +4,680 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Panchang — the daily Indian almanac</title>
-<meta name="description" content="An offline daily Panchang: tithi, nakshatra, yoga, karana, rahu-kaal, sunrise and muhurat — computed on your device, no network.">
+<meta name="description" content="An offline daily Panchang: tithi, nakshatra, yoga, karana with the times they change, sunrise and sunset, moonrise, rahu-kaal, choghadiya, hora, samvat and muhurat — computed on your device, no network.">
 <meta name="theme-color" content="#150c0a">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
-  :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e}
+  :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e;--warn:#e0a33e;--bad:#e07a5f}
   *{box-sizing:border-box}
+  html{font-size:16px}
   body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  header,main,footer{max-width:820px;margin:0 auto;padding:18px}
+  header,main,footer{max-width:880px;margin:0 auto;padding:18px}
   h1{margin:0 0 2px;font-size:24px}
-  h2{font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:22px 0 8px}
+  h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:26px 0 9px}
   .muted{color:var(--mut)}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
   label{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
-  input,select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:inherit}
+  input,select,button{font:inherit}
+  input,select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+  input[type=search]{min-width:190px}
   button{background:var(--acc);color:#06210f;border:0;border-radius:10px;padding:9px 13px;font-weight:600;cursor:pointer}
   button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button.small{padding:5px 9px;font-size:12.5px;border-radius:8px}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px}
-  .card .k{font-size:12px;color:var(--mut)}
-  .card .v{font-size:19px;font-weight:650;margin-top:3px}
-  .card .s{font-size:12px;color:var(--mut)}
+  .grid.wide{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 13px}
+  .card .k{font-size:11.5px;color:var(--mut);letter-spacing:.03em}
+  .card .v{font-size:18px;font-weight:650;margin-top:3px}
+  .card .s{font-size:12px;color:var(--mut);margin-top:2px}
+  .card .s b{color:var(--ink);font-weight:600}
   .hero{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:14px}
-  .hero .big{font-size:26px;font-weight:700}
+  .hero .big{font-size:27px;font-weight:700;line-height:1.2}
+  .hero .sub{color:var(--mut);margin-top:2px}
   ul{margin:6px 0 0;padding-left:18px}
-  .pill{display:inline-block;background:rgba(34,197,94,.14);color:var(--acc);border-radius:999px;padding:2px 10px;font-size:12px;margin:2px 4px 0 0}
+  .pill{display:inline-block;background:rgba(34,197,94,.14);color:var(--acc);border-radius:999px;padding:2px 10px;font-size:12px;margin:4px 5px 0 0}
+  .pill.warn{background:rgba(224,163,62,.16);color:var(--warn)}
+  .pill.bad{background:rgba(224,122,95,.16);color:var(--bad)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:600;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr.good td:first-child{border-left:3px solid var(--acc);padding-left:6px}
+  details{margin-top:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+  details>summary{cursor:pointer;padding:11px 13px;font-size:13px;color:var(--mut);list-style:none}
+  details>summary::-webkit-details-marker{display:none}
+  details[open]>summary{border-bottom:1px solid var(--line)}
+  details .inner{padding:13px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   footer{font-size:13px}
   a{color:var(--acc)}
+  #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:var(--card);border:1px solid var(--line);
+    border-radius:10px;padding:9px 14px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+  #toast.on{opacity:1}
+  html[data-contrast="high"]{--bg:#000;--card:#0b0b0b;--ink:#fff;--mut:#d0d0d0;--line:#555;--acc:#5cff9d}
+  html[data-contrast="high"] .card,html[data-contrast="high"] .hero{border-width:2px}
+  html[data-scale="lg"]{font-size:18.5px}
+  html[data-scale="xl"]{font-size:21px}
+  @media (max-width:640px){ .two{grid-template-columns:1fr} }
+  @media print{
+    :root{--bg:#fff;--card:#fff;--ink:#000;--mut:#333;--line:#bbb;--acc:#000}
+    body{background:#fff;color:#000}
+    header nav,.noprint,button,details>summary,#toast{display:none !important}
+    .card,.hero{border-color:#999;break-inside:avoid}
+    h2{color:#000}
+    a{color:#000;text-decoration:none}
+    footer{border-top:1px solid #999;margin-top:18px}
+    .two{grid-template-columns:1fr 1fr}
+  }
 </style>
 </head>
 <body>
 <header>
   <h1>Panchang</h1>
-  <p class="muted">The daily Indian almanac — offline, on your device.</p>
-</header>
-<main>
-  <div class="row">
-    <div><label for="date">Date</label><input id="date" type="date"></div>
-    <div><label for="lat">Latitude</label><input id="lat" type="number" step="0.0001" value="19.0760" size="9"></div>
-    <div><label for="lng">Longitude</label><input id="lng" type="number" step="0.0001" value="72.8777" size="9"></div>
-    <div><label for="tz">UTC offset</label><input id="tz" type="number" step="0.25" value="5.5" size="5"></div>
-    <button id="geo" class="ghost" title="Use my location">Use my location</button>
-    <button id="today" class="ghost">Today</button>
+  <p class="muted" style="margin:0 0 12px">The daily Indian almanac — computed on your device.</p>
+  <div class="row noprint">
+    <div><label for="date" data-i18n="lblDate">Date</label><input id="date" type="date"></div>
+    <div><label for="place" data-i18n="lblPlace">Place</label><input id="place" type="search" list="citylist" placeholder="Search a city" autocomplete="off"></div>
+    <datalist id="citylist"></datalist>
+    <button id="geo" class="ghost" title="Use my location" data-i18n="lblGeo">Use my location</button>
+    <button id="today" class="ghost" data-i18n="lblToday">Today</button>
+    <button id="prev" class="ghost small" aria-label="Previous day">◀</button>
+    <button id="next" class="ghost small" aria-label="Next day">▶</button>
   </div>
+  <details class="noprint" id="settings">
+    <summary data-i18n="lblSettings">Place, settings and data</summary>
+    <div class="inner">
+      <div class="row">
+        <div><label for="lat" data-i18n="lblLat">Latitude</label><input id="lat" type="number" step="0.0001" value="19.0760" style="width:120px"></div>
+        <div><label for="lng" data-i18n="lblLng">Longitude</label><input id="lng" type="number" step="0.0001" value="72.8777" style="width:120px"></div>
+        <div><label for="zone" data-i18n="lblZone">Time zone</label><input id="zone" type="text" value="Asia/Kolkata" style="width:170px"></div>
+        <div><label for="tz" data-i18n="lblOffset">Offset used</label><input id="tz" type="number" step="0.25" value="5.5" style="width:90px"></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div><label for="at" data-i18n="lblAt">The day is read at</label>
+          <select id="at">
+            <option value="noon">Local noon (default)</option>
+            <option value="sunrise">Sunrise (traditional)</option>
+            <option value="midnight">Midnight</option>
+          </select>
+        </div>
+        <div><label for="lang" data-i18n="lblLang">Language</label>
+          <select id="lang"><option value="en">English</option><option value="hi">हिन्दी</option><option value="gu">ગુજરાતી</option></select>
+        </div>
+        <div><label for="numerals" data-i18n="lblDigits">Digits</label>
+          <select id="numerals"><option value="latin">0 1 2 3</option><option value="native">Native</option></select>
+        </div>
+        <div><label for="scale" data-i18n="lblScale">Text size</label>
+          <select id="scale"><option value="md">Normal</option><option value="lg">Large</option><option value="xl">Largest</option></select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button id="saveplace" class="ghost small">Save this place</button>
+        <button id="jsonout" class="ghost small">Export settings (JSON)</button>
+        <button id="jsonin" class="ghost small">Import settings</button>
+        <button id="print" class="ghost small">Print this day</button>
+        <button id="theme" class="ghost small">Toggle theme</button>
+        <button id="install" class="ghost small" hidden>Install this app</button>
+      </div>
+      <div id="places" style="margin-top:12px"></div>
+    </div>
+  </details>
+</header>
 
+<main>
   <div class="hero">
     <div id="dayline" class="muted">—</div>
     <div id="hero" class="big">—</div>
-    <div id="paksha" class="muted"></div>
+    <div id="paksha" class="sub"></div>
     <div id="obs"></div>
   </div>
 
-  <h2>Panchang</h2>
-  <div id="grid" class="grid"></div>
+  <h2 data-i18n="headLimbs">The five limbs, and when they change</h2>
+  <div id="limbs" class="grid wide"></div>
 
-  <h2>Muhurat finder</h2>
-  <p class="muted">The next auspicious windows (Shukla tithi with a favourable nakshatra).</p>
-  <button id="muhurat">Find muhurats</button>
-  <div id="muhurat-out" class="grid" style="margin-top:10px"></div>
+  <h2 data-i18n="headTimes">The day's times</h2>
+  <div id="times" class="grid"></div>
 
-  <h2>Data</h2>
-  <div class="row">
-    <button id="export" class="ghost">Export this month (CSV)</button>
-    <button id="theme" class="ghost">Toggle theme</button>
-    <div><label for="lang">Language</label>
-      <select id="lang"><option value="en">English</option><option value="hi">हिन्दी</option><option value="gu">ગુજરાતી</option></select>
-    </div>
+  <h2 data-i18n="headWindows">Windows to avoid, and the one to keep</h2>
+  <div id="windows" class="grid"></div>
+
+  <h2 data-i18n="headChog">Choghadiya</h2>
+  <div class="two">
+    <div><div class="card"><div class="k">Day · sunrise to sunset</div><div id="chogday" style="margin-top:8px"></div></div></div>
+    <div><div class="card"><div class="k">Night · sunset to sunrise</div><div id="chognight" style="margin-top:8px"></div></div></div>
   </div>
+
+  <h2 data-i18n="headHora">Hora</h2>
+  <div class="card"><div id="hora"></div></div>
+
+  <h2 data-i18n="headMonth">The month, and the years</h2>
+  <div id="month" class="grid"></div>
+
+  <h2 data-i18n="headFest">Festivals ahead</h2>
+  <div class="card"><div id="festivals" class="muted">—</div></div>
+
+  <h2 data-i18n="headMuhurat">Muhurat finder</h2>
+  <p class="muted" style="margin:0 0 8px">A favourable tithi with a favourable nakshatra, no bhadra, in the next sixty days.</p>
+  <button id="muhurat" class="noprint">Find muhurats</button>
+  <div id="muhurat-out" class="grid wide" style="margin-top:10px"></div>
+
+  <h2 data-i18n="headData">Data</h2>
+  <div class="row noprint">
+    <button id="csv" class="ghost">Export this month (CSV)</button>
+    <button id="ics" class="ghost">Export festivals and muhurats (ICS)</button>
+  </div>
+  <p class="muted" style="font-size:12.5px;margin-top:10px">CSV opens in a spreadsheet; ICS opens in whatever calendar is on your phone. Both are made on the device and downloaded — nothing is uploaded.</p>
 </main>
+
 <footer class="muted">
-  Computed offline from your date and place. Method: Meeus low-precision solar &amp; lunar longitude, Lahiri ayanamsa — a first pass; verify against a printed panchang for ritual use.<br>
-  Built with Forge · © 2026 Dr Sohil Momin · no accounts, no network, no telemetry<br>
-  <span id="buildstamp" class="muted"></span>
+  Computed offline from your date and your place. Method: Meeus solar and lunar longitudes with ΔT, a Lahiri ayanamsa, the standard rise/set equations — a first pass, accurate to a minute or two at a limb boundary; verify against a printed panchang for your city before ritual use.
+  <br><span id="buildstamp"></span>
 </footer>
 
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="loom-live" class="sr-only" aria-live="polite" style="position:absolute;left:-9999px"></div>
+<input type="file" id="filein" accept="application/json" hidden>
+
 <script src="web-kit.js"></script>
+<script src="data/names.js"></script>
+<script src="data/cities.js"></script>
+<script src="data/festivals.js"></script>
 <script src="panchang.js"></script>
 <script>
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
+  var N = window.PanchangNames, CITIES = window.PanchangCities || [], RULES = window.PanchangFestivals || [];
 
-  // Extra strings for this app, in the three languages web-kit ships.
-  Loom.i18n.extend("en", { panchang:"Panchang", tithi:"Tithi", nakshatra:"Nakshatra", yoga:"Yoga",
-    karana:"Karana", vaara:"Vaara", sunrise:"Sunrise", sunset:"Sunset", rahu:"Rahu Kaal", muhurat:"Muhurat" });
-  Loom.i18n.extend("hi", { panchang:"पंचांग", tithi:"तिथि", nakshatra:"नक्षत्र", yoga:"योग",
-    karana:"करण", vaara:"वार", sunrise:"सूर्योदय", sunset:"सूर्यास्त", rahu:"राहु काल", muhurat:"मुहूर्त" });
-  Loom.i18n.extend("gu", { panchang:"પંચાંગ", tithi:"તિથિ", nakshatra:"નક્ષત્ર", yoga:"યોગ",
-    karana:"કરણ", vaara:"વાર", sunrise:"સૂર્યોદય", sunset:"સૂર્યાસ્ત", rahu:"રાહુ કાળ", muhurat:"મુહૂર્ત" });
-
-  Loom.theme.apply();
-  var saved = Loom.storage.get("place", null);
-  if (saved) { $("lat").value = saved.lat; $("lng").value = saved.lng; $("tz").value = saved.tz; }
-  $("lang").value = Loom.i18n.lang;
-
-  function localDateInput() {
-    var t = new Date();
-    return new Date(t.getTime() - t.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  /* ---------- words ---------- */
+  var L = {
+    en: { tithi:"Tithi", nakshatra:"Nakshatra", yoga:"Yoga", karana:"Karana", vaara:"Vaara",
+      sunrise:"Sunrise", sunset:"Sunset", dawn:"Dawn (civil)", dusk:"Dusk (civil)",
+      moonrise:"Moonrise", moonset:"Moonset", daylen:"Day length", rahu:"Rahu Kaal",
+      gulika:"Gulika Kaal", yamaganda:"Yamaganda", abhijit:"Abhijit",
+      masa:"Lunar month", amanta:"Amanta month", samvat:"Vikram Samvat", shaka:"Shaka Samvat",
+      samvatsara:"Samvatsara", ritu:"Season", ayana:"Ayana", sunrashi:"Sun sign",
+      moonrashi:"Moon sign", phase:"Moon", illum:"Illuminated", paksha:"Paksha",
+      until:"until", from:"from", good:"good", next:"next", mins:"min",
+      festivals:"—", saved:"Saved", place:"Place", settings:"Settings" },
+    hi: { tithi:"तिथि", nakshatra:"नक्षत्र", yoga:"योग", karana:"करण", vaara:"वार",
+      sunrise:"सूर्योदय", sunset:"सूर्यास्त", dawn:"प्रातःकाल", dusk:"सायंकाल",
+      moonrise:"चंद्रोदय", moonset:"चंद्रास्त", daylen:"दिनमान", rahu:"राहु काल",
+      gulika:"गुलिक काल", yamaganda:"यमगंड", abhijit:"अभिजित",
+      masa:"चांद्र मास", amanta:"अमांत मास", samvat:"विक्रम संवत", shaka:"शक संवत",
+      samvatsara:"संवत्सर", ritu:"ऋतु", ayana:"अयन", sunrashi:"सूर्य राशि",
+      moonrashi:"चंद्र राशि", phase:"चंद्र", illum:"प्रकाशित", paksha:"पक्ष",
+      until:"तक", from:"से", good:"शुभ", next:"आगे", mins:"मिनट",
+      festivals:"—", saved:"सहेजा गया", place:"स्थान", settings:"सेटिंग" },
+    gu: { tithi:"તિથિ", nakshatra:"નક્ષત્ર", yoga:"યોગ", karana:"કરણ", vaara:"વાર",
+      sunrise:"સૂર્યોદય", sunset:"સૂર્યાસ્ત", dawn:"સવાર", dusk:"સાંજ",
+      moonrise:"ચંદ્રોદય", moonset:"ચંદ્રાસ્ત", daylen:"દિવસનો સમય", rahu:"રાહુ કાળ",
+      gulika:"ગુલિક કાળ", yamaganda:"યમગંડ", abhijit:"અભિજિત",
+      masa:"ચાંદ્ર માસ", amanta:"અમાંત માસ", samvat:"વિક્રમ સંવત", shaka:"શક સંવત",
+      samvatsara:"સંવત્સર", ritu:"ઋતુ", ayana:"અયન", sunrashi:"સૂર્ય રાશિ",
+      moonrashi:"ચંદ્ર રાશિ", phase:"ચંદ્ર", illum:"પ્રકાશિત", paksha:"પક્ષ",
+      until:"સુધી", from:"થી", good:"શુભ", next:"આગળ", mins:"મિનિટ",
+      festivals:"—", saved:"સાચવેલું", place:"સ્થળ", settings:"સેટિંગ" }
+  };
+  var OBS = {
+    en: { Purnima:"Purnima", Amavasya:"Amavasya", Ekadashi:"Ekadashi", Pradosh:"Pradosh",
+      Chaturthi:"Chaturthi", Ashtami:"Ashtami", Bhadra:"Bhadra", Sankranti:"Sankranti",
+      solar:"Solar eclipse", lunar:"Lunar eclipse", likely:"likely", possible:"possible",
+      norise:"no rise today", noSet:"no set today" },
+    hi: { Purnima:"पूर्णिमा", Amavasya:"अमावस्या", Ekadashi:"एकादशी", Pradosh:"प्रदोष",
+      Chaturthi:"चतुर्थी", Ashtami:"अष्टमी", Bhadra:"भद्रा", Sankranti:"संक्रांति",
+      solar:"सूर्य ग्रहण", lunar:"चंद्र ग्रहण", likely:"संभावित", possible:"संभव",
+      norise:"आज उदय नहीं", noSet:"आज अस्त नहीं" },
+    gu: { Purnima:"પૂર્ણિમા", Amavasya:"અમાવાસ્યા", Ekadashi:"એકાદશી", Pradosh:"પ્રદોષ",
+      Chaturthi:"ચતુર્થી", Ashtami:"અષ્ટમી", Bhadra:"ભદ્રા", Sankranti:"સંક્રાંતિ",
+      solar:"સૂર્યગ્રહણ", lunar:"ચંદ્રગ્રહણ", likely:"સંભવિત", possible:"શક્ય",
+      norise:"આજે ઉદય નથી", noSet:"આજે અસ્ત નથી" }
+  };
+  function obs(k) { return (OBS[lang] && OBS[lang][k]) || OBS.en[k] || k; }
+  var MORE = {"en": {"headLimbs": "The five limbs, and when they change", "headTimes": "The day's times", "headWindows": "Windows to avoid, and the one to keep", "headChog": "Choghadiya", "headHora": "Hora", "headMonth": "The month, and the years", "headFest": "Festivals ahead", "headMuhurat": "Muhurat finder", "headData": "Data", "colName": "Name", "colFrom": "From", "colTo": "To", "chogDay": "Day · sunrise to sunset", "chogNight": "Night · sunset to sunrise", "pada": "pada", "muhurtaUnit": "muhurat", "hourUnit": "h", "lblSettings": "Place, settings and data", "lblDate": "Date", "lblPlace": "Place", "lblGeo": "Use my location", "lblToday": "Today", "lblLat": "Latitude", "lblLng": "Longitude", "lblZone": "Time zone", "lblOffset": "Offset used", "lblAt": "The day is read at", "lblLang": "Language", "lblDigits": "Digits", "lblScale": "Text size", "ph0": "New moon", "ph1": "Waxing crescent", "ph2": "First quarter", "ph3": "Waxing gibbous", "ph4": "Full moon", "ph5": "Waning gibbous", "ph6": "Last quarter", "ph7": "Waning crescent"}, "hi": {"headLimbs": "पंचांग के पाँच अंग, और उनका बदलाव", "headTimes": "दिन के समय", "headWindows": "अशुभ काल, और एक शुभ", "headChog": "चौघड़िया", "headHora": "होरा", "headMonth": "मास और संवत", "headFest": "आने वाले त्योहार", "headMuhurat": "मुहूर्त खोज", "headData": "डेटा", "colName": "नाम", "colFrom": "से", "colTo": "तक", "chogDay": "दिन · सूर्योदय से सूर्यास्त", "chogNight": "रात · सूर्यास्त से सूर्योदय", "pada": "चरण", "muhurtaUnit": "मुहूर्त", "hourUnit": "घं", "lblSettings": "स्थान, सेटिंग और डेटा", "lblDate": "दिनांक", "lblPlace": "स्थान", "lblGeo": "मेरा स्थान", "lblToday": "आज", "lblLat": "अक्षांश", "lblLng": "देशांतर", "lblZone": "समय क्षेत्र", "lblOffset": "प्रयुक्त अंतर", "lblAt": "दिन पढ़ा जाता है", "lblLang": "भाषा", "lblDigits": "अंक", "lblScale": "अक्षर आकार", "ph0": "नवचंद्र", "ph1": "बढ़ता चंद्र", "ph2": "अर्धचंद्र", "ph3": "पूर्ण के निकट", "ph4": "पूर्णिमा", "ph5": "घटता चंद्र", "ph6": "कृष्ण अर्धचंद्र", "ph7": "क्षीण चंद्र"}, "gu": {"headLimbs": "પંચાંગના પાંચ અંગ, અને તેમનો બદલાવ", "headTimes": "દિવસના સમય", "headWindows": "અશુભ કાળ, અને એક શુભ", "headChog": "ચોઘડિયા", "headHora": "હોરા", "headMonth": "માસ અને સંવત", "headFest": "આવતા તહેવારો", "headMuhurat": "મુહૂર્ત શોધ", "headData": "ડેટા", "colName": "નામ", "colFrom": "થી", "colTo": "સુધી", "chogDay": "દિવસ · સૂર્યોદયથી સૂર્યાસ્ત", "chogNight": "રાત · સૂર્યાસ્તથી સૂર્યોદય", "pada": "ચરણ", "muhurtaUnit": "મુહૂર્ત", "hourUnit": "કલાક", "lblSettings": "સ્થળ, સેટિંગ અને ડેટા", "lblDate": "તારીખ", "lblPlace": "સ્થળ", "lblGeo": "મારું સ્થળ", "lblToday": "આજે", "lblLat": "અક્ષાંશ", "lblLng": "રેખાંશ", "lblZone": "સમય ક્ષેત્ર", "lblOffset": "વપરાયેલ તફાવત", "lblAt": "દિવસ વાંચવામાં આવે છે", "lblLang": "ભાષા", "lblDigits": "અંક", "lblScale": "અક્ષર કદ", "ph0": "નવચંદ્ર", "ph1": "વધતો ચંદ્ર", "ph2": "અડધો ચંદ્ર", "ph3": "પૂર્ણની નજીક", "ph4": "પૂર્ણિમા", "ph5": "ઘટતો ચંદ્ર", "ph6": "કૃષ્ણ અડધો ચંદ્ર", "ph7": "ક્ષીણ ચંદ્ર"}};
+  Object.keys(MORE).forEach(function (lg) {
+    if (!L[lg]) L[lg] = {};
+    Object.keys(MORE[lg]).forEach(function (k) { L[lg][k] = MORE[lg][k]; });
+  });
+  var lang = "en", useNative = false;
+  function t(k) { return (L[lang] && L[lang][k]) || L.en[k] || k; }
+  function phaseName(p) {
+    var n = p.moonPhase && p.moonPhase.name || "";
+    var map = { "New moon": "ph0", "Waxing crescent": "ph1", "First quarter": "ph2",
+      "Waxing gibbous": "ph3", "Full moon": "ph4", "Waning gibbous": "ph5",
+      "Last quarter": "ph6", "Waning crescent": "ph7" };
+    return map[n] ? t(map[n]) : n;
   }
-  $("date").value = localDateInput();
+  function translateUI() {
+    [].forEach.call(document.querySelectorAll("[data-i18n]"), function (el) {
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+  }
 
+  /* ---------- state ---------- */
+  var state = {
+    date: null, lat: 19.0760, lng: 72.8777, zone: "Asia/Kolkata", tz: 5.5,
+    at: "noon", scale: "md", contrast: ""
+  };
+  var memo = {};
+
+  function load() {
+    var s = Loom.storage.get("panchang.settings", null);
+    if (s) {
+      ["lat","lng","zone","tz","at","scale","contrast"].forEach(function (k) {
+        if (s[k] !== undefined && s[k] !== null) state[k] = s[k];
+      });
+      if (s.date) state.date = s.date;
+      if (s.lang) lang = s.lang;
+      if (s.numerals) useNative = s.numerals === "native";
+    }
+    if (!state.date) state.date = todayISO();
+  }
+  function save() {
+    Loom.storage.set("panchang.settings", {
+      lat: state.lat, lng: state.lng, zone: state.zone, tz: state.tz, at: state.at,
+      scale: state.scale, contrast: state.contrast, date: state.date,
+      lang: lang, numerals: useNative ? "native" : "latin"
+    });
+  }
+
+  function todayISO() {
+    var d = new Date();
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  }
+
+  /* ---------- the zone, without a library ----------
+   * Intl carries the world's time zones in the browser. Asking it for the
+   * offset on a given instant is the only way to be right about daylight
+   * saving without shipping a table — and it needs no network.
+   */
+  function zoneOffset(zone, when) { return Panchang.zoneOffset(zone, when); }
+  function offsetFor(when) {
+    var z = zoneOffset(state.zone, when || new Date(state.date + "T12:00:00Z"));
+    if (z == null) return state.tz;
+    return z;
+  }
+
+  /* ---------- formatting ---------- */
+  function num(text) { return useNative ? N.numerals(text, lang) : String(text); }
   function hhmm(d) {
     if (!d) return "—";
-    var tz = parseFloat($("tz").value) || 0;
-    var x = new Date(d.getTime() + tz * 3600000);
+    var off = offsetFor(d);
+    var x = new Date(d.getTime() + off * 3600000);
     var h = x.getUTCHours(), m = x.getUTCMinutes();
-    return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
+    return num((h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m);
+  }
+  function dmy(d) {
+    if (!d) return "—";
+    var off = offsetFor(d);
+    var x = new Date(d.getTime() + off * 3600000);
+    return num(x.getUTCDate()) + "/" + num(x.getUTCMonth() + 1) + "/" + num(x.getUTCFullYear());
+  }
+  function window2(w) {
+    if (!w || !w.start || !w.end) return "—";
+    return hhmm(w.start) + " → " + hhmm(w.end);
   }
 
+  /* ---------- compute, memoised per (day, place, at) ---------- */
+  function opts() { return { lat: state.lat, lng: state.lng, tz: offsetFor(), at: state.at }; }
+  function dayFor(iso) {
+    var p = iso.split("-");
+    return new Date(+p[0], +p[1] - 1, +p[2]);
+  }
+  function computeDay(iso) {
+    var key = iso + "|" + state.lat + "," + state.lng + "|" + state.at;
+    if (memo[key]) return memo[key];
+    var o = opts();
+    o.tz = offsetFor(new Date(Date.parse(iso + "T06:00:00Z")));
+    var p = Panchang.compute(dayFor(iso), o);
+    memo[key] = p;
+    return p;
+  }
+
+  /* ---------- rendering ---------- */
   function card(k, v, s) {
-    var c = Loom.ui.el("div", { class: "card" }, [
+    var el = Loom.ui.el("div", { class: "card" }, [
       Loom.ui.el("div", { class: "k", text: k }),
       Loom.ui.el("div", { class: "v", text: v }),
       s ? Loom.ui.el("div", { class: "s", text: s }) : null
     ].filter(Boolean));
-    return c;
+    return el;
+  }
+  function fill(id, cards) {
+    var box = $(id); box.innerHTML = "";
+    cards.forEach(function (c) { box.appendChild(c); });
+  }
+  function name(kind, index) { return N.byIndex(kind, index, lang); }
+  function pkName(paksha) { return N.byIndex("paksha", paksha === "Shukla" ? 0 : 1, lang); }
+
+  function render() {
+    var iso = state.date;
+    var p = computeDay(iso);
+    state.tz = offsetFor(new Date(Date.parse(iso + "T06:00:00Z")));
+
+    var wk = new Date(p.date).getDay();
+    $("dayline").textContent = dmy(p.date) + " · " + name("vaara", wk) + " · " +
+      N.byIndex("masa", p.month.masaIndex, lang) + " (" + t("masa") + ")";
+    $("hero").textContent = pkName(p.tithi.paksha) + " " + name("tithi", p.tithi.index);
+    $("paksha").textContent = t("nakshatra") + " " + name("nakshatra", p.nakshatra.index) +
+      " · " + t("yoga") + " " + name("yoga", p.yoga.index) +
+      " · " + t("karana") + " " + N.karanaName(p.karana.name, lang);
+
+    var pills = [];
+    (p.observances || []).forEach(function (o) {
+      pills.push('<span class="pill">' + obs(o) + "</span>");
+    });
+    if (p.eclipse) {
+      pills.push('<span class="pill warn">' + obs(p.eclipse.kind) + " · " +
+        obs(p.eclipse.likely ? "likely" : "possible") + "</span>");
+    }
+    if (p.polar) pills.push('<span class="pill bad">' + p.polar + " at this latitude</span>");
+    $("obs").innerHTML = pills.join("");
+
+    /* limbs with their windows */
+    fill("limbs", [
+      card(t("tithi"), name("tithi", p.tithi.index), pkName(p.tithi.paksha) + " · " + window2(p.limbs.tithi)),
+      card(t("nakshatra"), name("nakshatra", p.nakshatra.index), t("pada") + " " + num(p.nakshatra.pada) + " · " + window2(p.limbs.nakshatra)),
+      card(t("yoga"), name("yoga", p.yoga.index), window2(p.limbs.yoga)),
+      card(t("karana"), N.karanaName(p.karana.name, lang), window2(p.limbs.karana)),
+      card(t("vaara"), name("vaara", wk), p.bhadra ? N.karanaName("Vishti", lang) + " (bhadra)" : "")
+    ]);
+
+    /* the times */
+    fill("times", [
+      card(t("sunrise"), hhmm(p.sunrise), t("dawn") + " " + hhmm(p.dawn)),
+      card(t("sunset"), hhmm(p.sunset), t("dusk") + " " + hhmm(p.dusk)),
+      card(t("daylen"), p.dayLength ? num(p.dayLength.toFixed(2)) + " " + t("hourUnit") : "—",
+        num(Math.round(p.muhurtaLength || 0)) + " " + t("mins") + " " + t("muhurtaUnit")),
+      card(t("moonrise"), hhmm(p.moonrise), p.moonrise ? "" : obs("norise")),
+      card(t("moonset"), hhmm(p.moonset), p.moonset ? "" : obs("noSet")),
+      card(t("illum"), num(Math.round(p.moonPhase.illumination * 100)) + "%", phaseName(p))
+    ]);
+
+    /* windows */
+    fill("windows", [
+      card(t("rahu"), p.rahuKaal ? hhmm(p.rahuKaal.start) + "–" + hhmm(p.rahuKaal.end) : "—", ""),
+      card(t("gulika"), p.gulikaKaal ? hhmm(p.gulikaKaal.start) + "–" + hhmm(p.gulikaKaal.end) : "—", ""),
+      card(t("yamaganda"), p.yamaganda ? hhmm(p.yamaganda.start) + "–" + hhmm(p.yamaganda.end) : "—", ""),
+      card(t("abhijit"), p.abhijit ? hhmm(p.abhijit.start) + "–" + hhmm(p.abhijit.end) : "—",
+        p.muhurtaLength ? num(Math.round(p.muhurtaLength)) + " " + t("mins") + " " + t("muhurtaUnit") : "")
+    ]);
+
+    /* choghadiya */
+    $("chogday").innerHTML = table(p.choghadiya ? p.choghadiya.day : [], true);
+    $("chognight").innerHTML = table(p.choghadiya ? p.choghadiya.night : [], true);
+
+    /* hora, compact */
+    if (p.hora && p.hora.length) {
+      $("hora").innerHTML = '<div class="row" style="gap:6px">' + p.hora.map(function (h) {
+        return '<span class="pill" style="background:rgba(255,255,255,.06);color:var(--ink)">' +
+          N.byIndex("hora", Panchang.tables.hora.indexOf(h.lord), lang) + " " + hhmm(h.start) + "</span>";
+      }).join("") + "</div>";
+    } else { $("hora").textContent = "—"; }
+
+    /* month and years */
+    fill("month", [
+      card(t("masa"), N.byIndex("masa", p.month.masaIndex, lang), t("amanta") + " " + N.byIndex("masa", p.month.amantaIndex, lang)),
+      card(t("samvat"), num(p.month.vikram), t("shaka") + " " + num(p.month.shaka)),
+      card(t("samvatsara"), p.month.samvatsara, ""),
+      card(t("ritu"), N.pick(lang, { en: p.month.ritu, hi: N.byIndex("ritu", Panchang.tables.ritu.indexOf(p.month.ritu), lang) }), N.byIndex("ayana", p.month.ayana === "Uttarayana" ? 0 : 1, lang)),
+      card(t("sunrashi"), N.byIndex("rashi", p.month.sunRashi.index, lang), ""),
+      card(t("moonrashi"), N.byIndex("rashi", p.moonRashi.index, lang), phaseName(p))
+    ]);
+
+    renderFestivals(p);
+    save();
+    writeHash();
+    Loom.a11y.announce("Panchang for " + dmy(p.date) + ": " + name("tithi", p.tithi.index));
   }
 
-  /* A day is addressable: #d=2026-11-08&lat=19.076&lng=72.8777&tz=5.5&lang=gu&muhurat=1
-     makes the almanac linkable and shareable, and lets the landing page drive this
-     frame to a day worth seeing. Nothing here touches the network. */
+  function table(rows, markGood) {
+    if (!rows || !rows.length) return '<span class="muted">—</span>';
+    var html = "<table><thead><tr><th>" + t("colName") + "</th><th>" + t("colFrom") + "</th><th>" + t("colTo") + "</th></tr></thead><tbody>";
+    rows.forEach(function (r) {
+      html += '<tr class="' + (markGood && r.good ? "good" : "") + '"><td>' +
+        N.byIndex("choghadiya", Panchang.tables.choghadiya.indexOf(r.name), lang) +
+        '</td><td class="num">' + hhmm(r.start) + '</td><td class="num">' + hhmm(r.end) + "</td></tr>";
+    });
+    return html + "</tbody></table>";
+  }
+
+  function renderFestivals(p) {
+    var start = dayFor(state.date);
+    var end = new Date(start.getTime() + 400 * 86400000);
+    var list = Panchang.festivalsIn(start, end, RULES, opts()).slice(0, 4);
+    var box = $("festivals");
+    if (!list.length) { box.textContent = "—"; return; }
+    box.innerHTML = list.map(function (f) {
+      return '<div style="padding:5px 0;border-bottom:1px solid var(--line)"><b>' + f.name +
+        "</b> <span class=\"muted\">" + dmy(f.date) + " · " + f.rule.masa + " " +
+        f.rule.paksha + " " + f.rule.tithi + "</span></div>";
+    }).join("");
+  }
+
+  /* ---------- controls ---------- */
+  function setPlace(city) {
+    state.lat = city.lat; state.lng = city.lng;
+    if (city.zone) state.zone = city.zone;
+    $("lat").value = state.lat; $("lng").value = state.lng; $("zone").value = state.zone;
+    $("place").value = city.name;
+    memo = {};
+    render();
+  }
+
+  $("citylist").innerHTML = CITIES.map(function (c) {
+    return '<option value="' + c.name + '">' + c.region + "</option>";
+  }).join("");
+
+  $("place").addEventListener("change", function () {
+    var q = this.value.trim().toLowerCase();
+    for (var i = 0; i < CITIES.length; i++) {
+      if (CITIES[i].name.toLowerCase() === q) { setPlace(CITIES[i]); return; }
+    }
+    toast("No bundled city by that name — set the coordinates below.");
+    $("settings").open = true;
+  });
+
+  $("geo").addEventListener("click", function () {
+    if (!navigator.geolocation) { toast("This browser has no location support."); return; }
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var lat = pos.coords.latitude, lng = pos.coords.longitude, best = null, bd = 1e9;
+      CITIES.forEach(function (c) {
+        var d = Math.pow(c.lat - lat, 2) + Math.pow(c.lng - lng, 2);
+        if (d < bd) { bd = d; best = c; }
+      });
+      state.lat = +lat.toFixed(4); state.lng = +lng.toFixed(4);
+      try {
+        var z = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (z) state.zone = z;
+      } catch (e) {}
+      $("lat").value = state.lat; $("lng").value = state.lng; $("zone").value = state.zone;
+      if (best && bd < 1) { $("place").value = best.name; }
+      memo = {}; render();
+      toast(best ? "Nearest bundled city: " + best.name : "Coordinates set.");
+    }, function () { toast("Location was refused — pick a city instead."); });
+  });
+
+  $("today").addEventListener("click", function () {
+    state.date = todayISO(); $("date").value = state.date; render();
+  });
+  $("prev").addEventListener("click", function () { shift(-1); });
+  $("next").addEventListener("click", function () { shift(1); });
+  function shift(n) {
+    var d = dayFor(state.date); d.setDate(d.getDate() + n);
+    state.date = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    $("date").value = state.date; render();
+  }
+
+  ["date"].forEach(function (id) { $(id).addEventListener("change", function () { state.date = this.value; render(); }); });
+  ["lat","lng","zone"].forEach(function (id) {
+    $(id).addEventListener("change", function () {
+      state[id] = id === "zone" ? this.value : parseFloat(this.value);
+      memo = {}; render();
+    });
+  });
+  $("at").addEventListener("change", function () { state.at = this.value; memo = {}; render(); });
+  $("lang").addEventListener("change", function () {
+    lang = this.value; Loom.i18n.setLang(lang); memo = {}; translateUI(); render();
+  });
+  $("numerals").addEventListener("change", function () { useNative = this.value === "native"; render(); });
+  $("scale").addEventListener("change", function () {
+    state.scale = this.value;
+    document.documentElement.setAttribute("data-scale", this.value);
+    save();
+  });
+  $("theme").addEventListener("click", function () { Loom.theme.toggle(); });
+  $("print").addEventListener("click", function () { window.print(); });
+
+  /* saved places */
+  function renderPlaces() {
+    var list = Loom.storage.get("panchang.places", []);
+    var box = $("places");
+    if (!list.length) { box.innerHTML = '<span class="muted">No saved places yet.</span>'; return; }
+    box.innerHTML = list.map(function (c, i) {
+      return '<button class="ghost small" data-i="' + i + '">' + c.name + " · " + c.lat + ", " + c.lng + "</button>";
+    }).join(" ");
+    [].forEach.call(box.querySelectorAll("button"), function (b) {
+      b.addEventListener("click", function () {
+        var c = list[+b.getAttribute("data-i")];
+        setPlace({ name: c.name, lat: c.lat, lng: c.lng, zone: c.zone });
+      });
+    });
+  }
+  $("saveplace").addEventListener("click", function () {
+    var list = Loom.storage.get("panchang.places", []);
+    var name = $("place").value || "Place";
+    list = list.filter(function (c) { return c.name !== name; });
+    list.unshift({ name: name, lat: state.lat, lng: state.lng, zone: state.zone });
+    Loom.storage.set("panchang.places", list.slice(0, 8));
+    renderPlaces(); toast("Saved " + name);
+  });
+
+  /* ---------- exports ---------- */
+  function download(filename, text, mime) {
+    var blob = new Blob([text], { type: (mime || "text/plain") + ";charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  $("csv").addEventListener("click", function () {
+    var d = dayFor(state.date), y = d.getFullYear(), mo = d.getMonth() + 1;
+    var rows = Panchang.monthTable(y, mo, opts()).map(function (p) {
+      return {
+        date: p.date.getFullYear() + "-" + (p.date.getMonth() + 1) + "-" + p.date.getDate(),
+        vaara: name("vaara", p.date.getDay()),
+        masa: N.byIndex("masa", p.month.masaIndex, lang),
+        paksha: pkName(p.tithi.paksha), tithi: name("tithi", p.tithi.index),
+        tithi_ends: hhmm(p.limbs.tithi.end),
+        nakshatra: name("nakshatra", p.nakshatra.index),
+        nakshatra_ends: hhmm(p.limbs.nakshatra.end),
+        yoga: name("yoga", p.yoga.index), karana: N.karanaName(p.karana.name, lang),
+        sunrise: hhmm(p.sunrise), sunset: hhmm(p.sunset),
+        rahu: p.rahuKaal ? hhmm(p.rahuKaal.start) + "-" + hhmm(p.rahuKaal.end) : "",
+        bhadra: p.bhadra ? "yes" : ""
+      };
+    });
+    download("panchang-" + y + "-" + mo + ".csv", Loom.csv.toCSV(rows), "text/csv");
+  });
+
+  $("ics").addEventListener("click", function () {
+    var start = dayFor(state.date);
+    var end = new Date(start.getTime() + 400 * 86400000);
+    var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//drsamonline//panchang//EN", "CALSCALE:GREGORIAN"];
+    function stamp(d) {
+      return d.getUTCFullYear() + ("0" + (d.getUTCMonth() + 1)).slice(-2) + ("0" + d.getUTCDate()).slice(-2) +
+        "T" + ("0" + d.getUTCHours()).slice(-2) + ("0" + d.getUTCMinutes()).slice(-2) + "00Z";
+    }
+    Panchang.festivalsIn(start, end, RULES, opts()).forEach(function (f) {
+      lines.push("BEGIN:VEVENT", "UID:" + f.name.replace(/\s+/g, "-").toLowerCase() + "-" +
+        f.date.toISOString().slice(0, 10) + "@drsamonline", "DTSTAMP:" + stamp(new Date()),
+        "DTSTART;VALUE=DATE:" + f.date.toISOString().slice(0, 10).replace(/-/g, ""),
+        "SUMMARY:" + f.name, "DESCRIPTION:" + f.rule.masa + " " + f.rule.paksha + " " +
+        f.rule.tithi + " (computed, not fetched)", "END:VEVENT");
+    });
+    Panchang.findMuhurat(start, { count: 8, days: 120, lat: state.lat, lng: state.lng, tz: offsetFor() })
+      .forEach(function (m) {
+        var s = m.abhijit ? m.abhijit.start : m.sunrise;
+        var e = m.abhijit ? m.abhijit.end : m.sunset;
+        if (!s || !e) return;
+        lines.push("BEGIN:VEVENT", "UID:muhurat-" + m.date.toISOString().slice(0, 10) + "@drsamonline",
+          "DTSTAMP:" + stamp(new Date()), "DTSTART:" + stamp(s), "DTEND:" + stamp(e),
+          "SUMMARY:Muhurat — " + name("tithi", m.tithi.index) + " " + name("nakshatra", m.nakshatra.index),
+          "END:VEVENT");
+      });
+    lines.push("END:VCALENDAR");
+    download("panchang.ics", lines.join("\r\n"), "text/calendar");
+  });
+
+  $("jsonout").addEventListener("click", function () {
+    download("panchang-settings.json", JSON.stringify({
+      settings: state, lang: lang, numerals: useNative ? "native" : "latin",
+      places: Loom.storage.get("panchang.places", [])
+    }, null, 2), "application/json");
+  });
+  $("jsonin").addEventListener("click", function () { $("filein").click(); });
+  $("filein").addEventListener("change", function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
+      try {
+        var o = JSON.parse(r.result);
+        if (o.settings) {
+          ["lat","lng","zone","tz","at","scale","contrast","date"].forEach(function (k) {
+            if (o.settings[k] !== undefined) state[k] = o.settings[k];
+          });
+        }
+        if (o.lang) lang = o.lang;
+        if (o.numerals) useNative = o.numerals === "native";
+        if (o.places) Loom.storage.set("panchang.places", o.places);
+        applyUI(); memo = {}; render(); renderPlaces();
+        toast("Settings imported.");
+      } catch (e) { toast("That file is not panchang settings."); }
+    };
+    r.readAsText(f);
+  });
+
+  /* ---------- muhurat ---------- */
+  $("muhurat").addEventListener("click", function () {
+    var list = Panchang.findMuhurat(dayFor(state.date),
+      Object.assign({ count: 6, days: 90 }, opts()));
+    var out = $("muhurat-out"); out.innerHTML = "";
+    if (!list.length) { out.appendChild(card("—", "None in 90 days", "")); return; }
+    list.forEach(function (m) {
+      out.appendChild(card(name("tithi", m.tithi.index) + " · " + dmy(m.date),
+        name("nakshatra", m.nakshatra.index),
+        m.abhijit ? t("abhijit") + " " + hhmm(m.abhijit.start) + "–" + hhmm(m.abhijit.end) : ""));
+    });
+  });
+
+  /* ---------- install ---------- */
+  var deferred = null;
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault(); deferred = e; $("install").hidden = false;
+  });
+  $("install").addEventListener("click", function () {
+    if (!deferred) return;
+    deferred.prompt();
+    deferred = null; $("install").hidden = true;
+  });
+
+  /* ---------- toast ---------- */
+  var toastTimer = null;
+  function toast(msg) {
+    var el = $("toast");
+    el.textContent = msg; el.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("on"); }, 2600);
+  }
+
+  /* ---------- a day is addressable ----------
+   * #d=2026-11-08&lat=19.076&lng=72.8777&zone=Asia/Kolkata&at=sunrise&lang=gu
+   * read on load, followed on hashchange, written back as the reader moves.
+   */
   function readHash() {
     var h = (location.hash || "").replace(/^#/, "");
     if (!h) return null;
@@ -136,108 +689,57 @@
     });
     return out;
   }
-
-  function writeHash() {
-    var q = ["d=" + ($("date").value || ""),
-      "lat=" + $("lat").value, "lng=" + $("lng").value, "tz=" + $("tz").value];
-    if ($("lang").value !== "en") q.push("lang=" + $("lang").value);
-    try { history.replaceState(null, "", "#" + q.join("&")); } catch (e) { /* file:// in some browsers */ }
-  }
-
-  function applyHash(wantMuhurat) {
+  function applyHash() {
     var h = readHash();
     if (!h) return false;
-    if (h.d && /^\d{4}-\d{2}-\d{2}$/.test(h.d)) $("date").value = h.d;
+    if (h.d && /^\d{4}-\d{2}-\d{2}$/.test(h.d)) state.date = h.d;
     ["lat", "lng", "tz"].forEach(function (k) {
-      if (h[k] !== undefined && isFinite(parseFloat(h[k]))) $(k).value = parseFloat(h[k]);
+      if (h[k] !== undefined && isFinite(parseFloat(h[k]))) state[k] = parseFloat(h[k]);
     });
-    if (h.lang && $("lang").querySelector('option[value="' + h.lang + '"]')) {
-      $("lang").value = h.lang;
-      Loom.i18n.setLang(h.lang);
-    }
-    return wantMuhurat !== false && (h.muhurat === "1" || h.muhurat === "true");
+    if (h.zone) state.zone = h.zone;
+    if (h.at && /^(noon|sunrise|midnight)$/.test(h.at)) state.at = h.at;
+    if (h.lang && L[h.lang]) lang = h.lang;
+    if (h.numerals) useNative = h.numerals === "native";
+    memo = {};
+    return true;
+  }
+  function writeHash() {
+    var q = ["d=" + state.date, "lat=" + state.lat, "lng=" + state.lng, "zone=" + state.zone];
+    if (state.at !== "noon") q.push("at=" + state.at);
+    if (lang !== "en") q.push("lang=" + lang);
+    if (useNative) q.push("numerals=native");
+    try { history.replaceState(null, "", "#" + q.join("&")); } catch (e) { /* file:// */ }
   }
 
-  function render() {
-    var parts = ($("date").value || localDateInput()).split("-");
-    var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-    var opts = { lat: parseFloat($("lat").value), lng: parseFloat($("lng").value), tz: parseFloat($("tz").value) };
-    Loom.storage.set("place", opts);
-
-    var p = Panchang.compute(d, opts);
-    var wk = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d.getDay()];
-    $("dayline").textContent = wk + ", " + d.toDateString() + " · " + p.vaara.name;
-    $("hero").textContent = p.tithi.paksha + " " + p.tithi.name;
-    $("paksha").textContent = "Tithi " + p.tithi.number + "/15 · " + p.nakshatra.name + " nakshatra · " + p.yoga.name + " yoga";
-    $("obs").innerHTML = (p.observances || []).map(function (o) {
-      return '<span class="pill">' + o + "</span>";
-    }).join("");
-
-    var g = $("grid"); g.innerHTML = "";
-    g.appendChild(card(Loom.i18n.t("tithi"), p.tithi.name, p.tithi.paksha + " · #" + p.tithi.number));
-    g.appendChild(card(Loom.i18n.t("nakshatra"), p.nakshatra.name, "pada index " + (p.nakshatra.index + 1)));
-    g.appendChild(card(Loom.i18n.t("yoga"), p.yoga.name, ""));
-    g.appendChild(card(Loom.i18n.t("karana"), p.karana.name, ""));
-    g.appendChild(card(Loom.i18n.t("vaara"), p.vaara.name, wk));
-    g.appendChild(card(Loom.i18n.t("sunrise"), hhmm(p.sunrise), "local time"));
-    g.appendChild(card(Loom.i18n.t("sunset"), hhmm(p.sunset), "local time"));
-    g.appendChild(card(Loom.i18n.t("rahu"), p.rahuKaal ? hhmm(p.rahuKaal.start) + "–" + hhmm(p.rahuKaal.end) : "—", "local time"));
-    Loom.a11y.announce("Panchang for " + d.toDateString() + ": " + p.tithi.paksha + " " + p.tithi.name);
-    writeHash();
+  /* ---------- boot ---------- */
+  function applyUI() {
+    $("date").value = state.date;
+    $("lat").value = state.lat; $("lng").value = state.lng;
+    $("zone").value = state.zone; $("tz").value = state.tz;
+    $("at").value = state.at; $("lang").value = lang;
+    $("numerals").value = useNative ? "native" : "latin";
+    $("scale").value = state.scale;
+    document.documentElement.setAttribute("data-scale", state.scale);
+    if (state.contrast) document.documentElement.setAttribute("data-contrast", state.contrast);
+    var c = null;
+    for (var i = 0; i < CITIES.length; i++) {
+      if (Math.abs(CITIES[i].lat - state.lat) < 0.01 && Math.abs(CITIES[i].lng - state.lng) < 0.01) { c = CITIES[i]; break; }
+    }
+    $("place").value = c ? c.name : "";
   }
 
-  $("geo").addEventListener("click", function () {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(function (pos) {
-      $("lat").value = pos.coords.latitude.toFixed(4);
-      $("lng").value = pos.coords.longitude.toFixed(4);
-      $("tz").value = (-new Date().getTimezoneOffset() / 60);
-      render();
-    });
-  });
-  $("today").addEventListener("click", function () { $("date").value = localDateInput(); render(); });
-  $("theme").addEventListener("click", function () { Loom.theme.toggle(); });
-  $("lang").addEventListener("change", function () { Loom.i18n.setLang(this.value); render(); });
-  ["date", "lat", "lng", "tz"].forEach(function (id) { $(id).addEventListener("change", render); });
-
-  $("muhurat").addEventListener("click", function () {
-    var parts = ($("date").value || localDateInput()).split("-");
-    var opts = { lat: parseFloat($("lat").value), lng: parseFloat($("lng").value), tz: parseFloat($("tz").value) };
-    var list = Panchang.findMuhurat(new Date(+parts[0], +parts[1] - 1, +parts[2]), Object.assign({ count: 6 }, opts));
-    var out = $("muhurat-out"); out.innerHTML = "";
-    if (!list.length) { out.appendChild(card("—", "None found", "widen the search")); return; }
-    list.forEach(function (m) {
-      out.appendChild(card(m.date.toDateString(), m.tithi.name, m.nakshatra.name + " · " + m.vaara.name));
-    });
-  });
-
-  $("export").addEventListener("click", function () {
-    var parts = ($("date").value || localDateInput()).split("-");
-    var y = +parts[0], mo = +parts[1];
-    var opts = { lat: parseFloat($("lat").value), lng: parseFloat($("lng").value), tz: parseFloat($("tz").value) };
-    var rows = [], days = new Date(y, mo, 0).getDate();
-    for (var i = 1; i <= days; i++) {
-      var p = Panchang.compute(new Date(y, mo - 1, i), opts);
-      rows.push({ date: y + "-" + mo + "-" + i, vaara: p.vaara.name, paksha: p.tithi.paksha,
-        tithi: p.tithi.name, nakshatra: p.nakshatra.name, yoga: p.yoga.name, karana: p.karana.name,
-        sunrise: hhmm(p.sunrise), sunset: hhmm(p.sunset) });
-    }
-    Loom.csv.download("panchang-" + y + "-" + mo + ".csv", Loom.csv.toCSV(rows));
-  });
-
-  /* the build stamp — version, engine and the day it shipped */
+  Loom.theme.apply();
+  load();
+  applyHash();
+  applyUI();
+  translateUI();
+  renderPlaces();
   try {
-    $("buildstamp").textContent = "build 0.1.2 · engine " + Panchang.version;
+    $("buildstamp").textContent = "build 0.2.0 · engine " + Panchang.version +
+      " · " + CITIES.length + " cities bundled";
   } catch (e) {}
-
-  /* a link into a day wins over the defaults; then the first paint */
-  var wantMuhurat = applyHash();
   render();
-  if (wantMuhurat) $("muhurat").click();
-
-  window.addEventListener("hashchange", function () {
-    if (applyHash()) { render(); $("muhurat").click(); } else { render(); }
-  });
+  window.addEventListener("hashchange", function () { if (applyHash()) { applyUI(); render(); } });
 
   /* offline: the HTML network-first, the assets cache-first, cache bumped per release */
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
@@ -247,41 +749,5 @@
   }
 })();
 </script>
-
-<style>:focus-visible{outline:2px solid currentColor;outline-offset:2px}</style>
-
-
-<script>
-window.__smokeTest = function () {
-  var out = []; function ok(n, c) { out.push((c ? "PASS " : "FAIL ") + n); }
-  ok("the document rendered", !!document.body && document.body.children.length > 0);
-  ok("a heading is present", !!document.querySelector("h1, h2"));
-  ok("no script threw during load", !window.__bootError);
-  var kits = ["Export","Loom","CryptoKit","Case","Search","Srs","Game","Art","Audio","Ml","UI","Lan","Astro"];
-  var found = kits.filter(function (k) { return window[k]; });
-  ok("at least one kit is loaded (" + (found.join(", ") || "none") + ")", found.length > 0);
-  try { localStorage.setItem("__smoke","1"); ok("storage works", localStorage.getItem("__smoke") === "1"); localStorage.removeItem("__smoke"); } catch (e) { ok("storage works", false); }
-  console.log(out.join("\n"));
-  if (location.search.indexOf("test") >= 0) { var d = document.createElement("pre"); d.textContent = out.join("\n"); d.style.cssText = "position:fixed;left:0;right:0;bottom:0;background:#111;color:#eee;padding:12px;font:12px ui-monospace,monospace;z-index:99999;max-height:40vh;overflow:auto;white-space:pre-wrap"; document.body.appendChild(d); }
-  return out;
-};
-window.addEventListener("error", function () { window.__bootError = true; });
-</script>
-<style id="app-theme">
-  /* app-panchang - its own palette, type and shape.
-     Keyed on data-theme so the in-app theme toggle still works; !important is
-     required because web-kit sets these as inline styles on <html>. */
-  html[data-theme="dark"]{--bg:#150c0a !important;--card:#25110a !important;--ink:#fef3ee !important;--mut:#b67860 !important;--line:#3c1a0a !important;--acc:#f08750 !important;}
-  html[data-theme="light"]{--bg:#fef7f4 !important;--card:#ffffff !important;--ink:#261815 !important;--mut:#b85c30 !important;--line:#fce8dd !important;--acc:#c0480a !important;}
-  html,body{font-family:ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif !important;letter-spacing:0 !important;
-    background-image:radial-gradient(820px 360px at 50% -170px,
-      color-mix(in srgb, var(--acc) 16%, transparent), transparent 72%) !important;
-    background-repeat:no-repeat !important;background-attachment:fixed !important}
-  button,input,textarea,select{font-family:ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif !important}
-  button,.btn{border-radius:10px !important}
-  input,textarea,select{border-radius:8px !important}
-  .card,[class*="card"]{border-radius:12px !important}
-  button:not(.ghost):not(.tab){background:var(--acc) !important}
-</style>
 </body>
 </html>

@@ -27,3 +27,7 @@ jobs:
           node-version: "20"
       - name: Run tests
         run: node test-node.js
+      - name: Offline render check
+        # proves the app renders with every host unresolvable, not just that it
+        # loads nothing from elsewhere; skips itself if no browser is installed
+        run: node scripts/offline-check.js

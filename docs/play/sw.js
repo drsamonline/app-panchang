@@ -11,12 +11,15 @@
  */
 "use strict";
 
-var CACHE = "panchang-0.1.2";
+var CACHE = "panchang-0.2.0";
 var ASSETS = [
   "./",
   "./index.html",
   "./web-kit.js",
   "./panchang.js",
+  "./data/names.js",
+  "./data/cities.js",
+  "./data/festivals.js",
   "./manifest.webmanifest",
   "./icon.svg"
 ];
