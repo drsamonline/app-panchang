@@ -80,7 +80,6 @@
 </footer>
 
 <script src="web-kit.js"></script>
-<script src="astro-kit.js"></script>
 <script src="panchang.js"></script>
 <script>
 (function () {
@@ -228,8 +227,7 @@
 
   /* the build stamp — version, engine and the day it shipped */
   try {
-    $("buildstamp").textContent = "build 0.1.2 · engine " + Panchang.version +
-      " · astro " + (window.Astro ? Astro.version : "—");
+    $("buildstamp").textContent = "build 0.1.2 · engine " + Panchang.version;
   } catch (e) {}
 
   /* a link into a day wins over the defaults; then the first paint */

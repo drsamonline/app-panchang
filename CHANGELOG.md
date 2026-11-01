@@ -7,8 +7,17 @@
 `astro-kit.js` was split out of `panchang.js` when the astronomy moved to the shared kit, but
 the script tag was never added to the page. `panchang.js` threw on load, so the app rendered a
 blank hero and no cards — the deployed demo, the EXE and the APK all shipped a broken day.
-The screenshot for the new landing page is what caught it. A test now reads the page, checks
-that every script it names exists, and that `astro-kit` is loaded before `panchang`.
+The screenshot for the new landing page is what caught it.
+
+The obvious fix — add the tag — is refused by the estate's `kit-guard` step: *a kit is never
+retrofitted into a repository*, and both pages predate the split. The guard is right, so the
+fix went the other way: the astronomy core is **inline in `panchang.js`** again, the vendored
+`astro-kit.js` is gone, and the page loads only the runtime it always had plus its own engine.
+Nothing has to be loaded before it, the dependency count is still zero, and there is one file
+that computes the day instead of two that could drift apart.
+
+Tests now read the page and check that every script it names exists, that it retrofits no kit,
+and that `panchang.js` carries no `require` and depends on no global.
 
 ### A landing page, and it is not the app
 

@@ -84,9 +84,12 @@ REF.forEach(function (r) {
 
 
 /* ---- 8. the page actually wires the engine up ----
- * This is the bug that shipped once: astro-kit.js was split out of panchang.js
- * and the script tag was never added, so panchang.js threw on load and the app
- * rendered an empty day. A test on the page, not just the engine, catches it. */
+ * This is the bug that shipped once: the astronomy was split out of panchang.js
+ * into a kit and the script tag was never added, so panchang.js threw on load and
+ * the app rendered an empty day. A test on the page, not just the engine, catches
+ * it - and the estate's kit guard forbids fixing that by retrofitting the kit back
+ * into an existing page, so the core is inline and the page loads only its own
+ * scripts. */
 (function () {
   var fs = require("fs"), path = require("path");
   var dir = path.join(__dirname, "docs", "play");
@@ -97,9 +100,14 @@ REF.forEach(function (r) {
   ok("every script the page loads exists", srcs.every(function (s) {
     return fs.existsSync(path.join(dir, s));
   }), srcs.join(", "));
-  ok("astro-kit is loaded before panchang",
-    srcs.indexOf("astro-kit.js") !== -1 && srcs.indexOf("astro-kit.js") < srcs.indexOf("panchang.js"),
-    srcs.join(" -> "));
+  /* web-kit.js is the one kit this page shipped with; the kit guard allows an
+   * existing load to stay and refuses a new one, so anything else is a retrofit. */
+  var kits = srcs.filter(function (s) { return /-kit\.js$/.test(s); });
+  ok("the page retrofits no kit (only the web-kit it already had)",
+    kits.every(function (k) { return k === "web-kit.js"; }), kits.join(", "));
+  ok("panchang.js is self-contained: no kit, no require, no global it depends on",
+    /\brequire\(/.test(require("fs").readFileSync(path.join(dir, "panchang.js"), "utf8")) === false &&
+    /root\.Astro/.test(require("fs").readFileSync(path.join(dir, "panchang.js"), "utf8")) === false);
   ok("the service worker is registered", html.indexOf('navigator.serviceWorker.register("sw.js")') !== -1);
   ok("the page links a manifest", /<link[^>]+rel="manifest"/.test(html));
   ok("a build stamp is printed", html.indexOf('id="buildstamp"') !== -1);
@@ -127,7 +135,7 @@ REF.forEach(function (r) {
   var fs = require("fs"), path = require("path");
   var dir = path.join(__dirname, "docs", "play");
   var sw = fs.readFileSync(path.join(dir, "sw.js"), "utf8");
-  ["web-kit.js", "astro-kit.js", "panchang.js", "index.html"].forEach(function (f) {
+  ["web-kit.js", "panchang.js", "index.html"].forEach(function (f) {
     ok("sw.js precaches " + f, sw.indexOf(f) !== -1);
   });
   var v = JSON.parse(fs.readFileSync(path.join(dir, "manifest.webmanifest"), "utf8"));

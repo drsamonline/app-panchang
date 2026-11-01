@@ -344,7 +344,7 @@ footer .fnote{max-width:36em;line-height:1.6}
   <div class="wrap">
     <div class="stats">
       <div class="stat"><b>37</b><span>headless assertions — engine against an independent ephemeris, plus the page wiring and an offline guard</span></div>
-      <div class="stat"><b>0</b><span>runtime dependencies — three in-repo scripts and nothing else</span></div>
+      <div class="stat"><b>0</b><span>runtime dependencies — one in-repo script, and the astronomy inside it</span></div>
       <div class="stat"><b>0.05°</b><span>agreement on sun–moon elongation; sunrise and sunset within a few minutes</span></div>
       <div class="stat"><b>3</b><span>languages — English, Hindi and Gujarati, in their own scripts, switchable in the app</span></div>
     </div>
@@ -357,7 +357,7 @@ footer .fnote{max-width:36em;line-height:1.6}
       <div>
         <p class="eyebrow">method</p>
         <h2>From first principles, not from a lookup table.</h2>
-        <p class="dim" style="margin-top:14px">The engine is <code>docs/play/astro-kit.js</code> plus <code>docs/play/panchang.js</code> — about three hundred lines that compute the almanac rather than recite it.</p>
+        <p class="dim" style="margin-top:14px">The engine is <code>docs/play/panchang.js</code> — about three hundred lines, astronomy and almanac in one self-contained file, that compute the day rather than recite it.</p>
       </div>
       <div>
         <ol>
@@ -426,7 +426,6 @@ node test-node.js
   </div>
 </footer>
 
-<script src="play/astro-kit.js"></script>
 <script src="play/panchang.js"></script>
 <script>
 (function () {

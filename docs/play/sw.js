@@ -16,7 +16,6 @@ var ASSETS = [
   "./",
   "./index.html",
   "./web-kit.js",
-  "./astro-kit.js",
   "./panchang.js",
   "./manifest.webmanifest",
   "./icon.svg"

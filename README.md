@@ -22,9 +22,10 @@ place, with no network at any point.
 <!-- shot:end -->
 
 The landing page is not a picture of the app — it embeds the real `docs/play/` in a
-frame and drives it to a day worth seeing. The almanac is three scripts, all in this
-repository: a shared runtime (`web-kit.js`), the astronomy core (`astro-kit.js`) and the
-app layer (`panchang.js`). No build step, no bundler, no package install, no server.
+frame and drives it to a day worth seeing. The almanac is two scripts, both in this
+repository: a shared runtime (`web-kit.js`) and the engine (`panchang.js`), which carries the
+astronomy and the app's own layer in one self-contained file. No build step, no bundler, no
+package install, no server.
 
 ## What it does
 
@@ -40,10 +41,10 @@ docs/play/index.html#d=2026-11-08&lat=19.0760&lng=72.8777&tz=5.5&lang=gu
 | | |
 |---|---|
 | headless assertions, `node test-node.js` | **37 passing, 0 failed** |
-| runtime dependencies | **0** — three in-repo scripts |
+| runtime dependencies | **0** — two in-repo scripts |
 | sun–moon elongation vs an independent ephemeris | **better than 0.05°** |
 | languages | **3** — English, हिन्दी, ગુજરાતી |
-| engine | `astro-kit.js` 0.1.0 + `panchang.js` 0.2.0 |
+| engine | `panchang.js` 0.3.0 — astronomy and almanac inline |
 
 ## What it must not do, and does not
 
@@ -99,8 +100,7 @@ The app icon is [here](docs/play/icon-512.png) and ships inside both builds.
 ```
 docs/index.html              the landing page — night sky, gold, its own design
 docs/play/index.html         the app
-docs/play/astro-kit.js       astronomy core (shared)
-docs/play/panchang.js        the app's own layer: vaara, rahu-kaal, observances, muhurat
+docs/play/panchang.js        the engine: astronomy core + vaara, rahu-kaal, observances, muhurat
 docs/play/web-kit.js         the shared runtime: storage, i18n, CSV, theme, a11y
 docs/play/sw.js              offline shell — HTML network-first, assets cache-first
 docs/play/manifest.webmanifest
