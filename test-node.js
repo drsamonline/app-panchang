@@ -351,20 +351,22 @@ REF.forEach(function (r) {
   var srcs = [], m, re = /<script[^>]+src="([^"]+)"/g;
   while ((m = re.exec(html))) srcs.push(m[1]);
   ok("the page loads a script at all", srcs.length > 0, srcs.join(", "));
+  function bare(u) { return u.split("?")[0]; }
   ok("every script the page loads exists", srcs.every(function (s) {
-    return fs.existsSync(path.join(dir, s));
+    return fs.existsSync(path.join(dir, bare(s)));
   }), srcs.join(", "));
   /* web-kit.js is the one kit this page shipped with; the kit guard allows an
    * existing load to stay and refuses a new one, so anything else is a retrofit. */
-  var kits = srcs.filter(function (s) { return /-kit\.js$/.test(s); });
+  var kits = srcs.filter(function (s) { return /-kit\.js$/.test(bare(s)); });
   ok("the page retrofits no kit (only the web-kit it already had)",
-    kits.every(function (k) { return k === "web-kit.js"; }), kits.join(", "));
+    kits.every(function (k) { return bare(k) === "web-kit.js"; }), kits.join(", "));
   var engine = fs.readFileSync(path.join(dir, "panchang.js"), "utf8");
   ok("panchang.js is self-contained: no require, no global it depends on",
     !/\brequire\(/.test(engine) && !/root\.Astro/.test(engine));
+  var order = srcs.map(bare);
   ok("the data files load before the app script",
-    srcs.indexOf("data/names.js") < srcs.indexOf("panchang.js") &&
-    srcs.indexOf("data/festivals.js") < srcs.indexOf("panchang.js"), srcs.join(" -> "));
+    order.indexOf("data/names.js") !== -1 && order.indexOf("data/names.js") < order.indexOf("panchang.js") &&
+    order.indexOf("data/festivals.js") < order.indexOf("panchang.js"), order.join(" -> "));
   ok("the service worker is registered", html.indexOf('navigator.serviceWorker.register("sw.js")') !== -1);
   ok("the page links a manifest", /<link[^>]+rel="manifest"/.test(html));
   ok("a build stamp is printed", html.indexOf('id="buildstamp"') !== -1);
@@ -405,7 +407,7 @@ REF.forEach(function (r) {
   var sw = fs.readFileSync(path.join(dir, "sw.js"), "utf8");
   ["web-kit.js", "panchang.js", "index.html", "data/names.js", "data/cities.js", "data/festivals.js"]
     .forEach(function (f) { ok("sw.js precaches " + f, sw.indexOf(f) !== -1); });
-  ok("sw.js bumps its cache name", /panchang-0\.\d+\.\d+/.test(sw));
+  ok("sw.js derives its cache name from the version", /var CACHE = "panchang-" \+ VERSION/.test(sw));
   var v = JSON.parse(fs.readFileSync(path.join(dir, "manifest.webmanifest"), "utf8"));
   ok("the manifest start_url is the app", v.start_url === "./" || v.start_url === "index.html", v.start_url);
   ok("the manifest ships a maskable icon",
@@ -427,6 +429,99 @@ REF.forEach(function (r) {
     if (/\bMIT License\b/.test(text)) drifted.push(f);
   });
   ok("no source header claims a different licence", drifted.length === 0, drifted.join(" "));
+})();
+
+/* ---- 26. one version, everywhere, and a way out of a stale cache ---- */
+(function () {
+  var root = __dirname;
+  var dir = path.join(root, "docs", "play");
+  var version = fs.readFileSync(path.join(root, "VERSION"), "utf8").trim();
+  ok("VERSION looks like a version", /^\d+\.\d+\.\d+$/.test(version), version);
+
+  var html = fs.readFileSync(path.join(dir, "index.html"), "utf8");
+  var srcs = [], m, re = /<(?:script|link)[^>]+(?:src|href)="([^"]+)"/g;
+  while ((m = re.exec(html))) srcs.push(m[1]);
+  var local = srcs.filter(function (u) { return !/^https?:|^data:/.test(u); });
+
+  /* a cache-first worker matches on the URL, so a release has to change the URL */
+  var busted = local.filter(function (u) { return /\?(^|.*)v=/.test(u) || /[?&]v=/.test(u); });
+  var needsBust = local.filter(function (u) {
+    return /\.(js|webmanifest)$/.test(u.split("?")[0]) && u !== "sw.js";
+  });
+  ok("every script and manifest the app loads is version-tagged",
+    needsBust.every(function (u) { return /[?&]v=/.test(u); }),
+    needsBust.filter(function (u) { return !/[?&]v=/.test(u); }).join(" "));
+  ok("the tag is this release's version",
+    needsBust.every(function (u) { return !/[?&]v=/.test(u) || u.split("v=")[1] === version; }), version);
+
+  var sw = fs.readFileSync(path.join(dir, "sw.js"), "utf8");
+  ok("the service worker's VERSION is this release",
+    new RegExp('var VERSION = "' + version.replace(/\./g, "\\.") + '"').test(sw), version);
+  ok("the worker precaches versioned assets", /\?v=" \+ VERSION/.test(sw));
+
+  /* the page must notice an engine older than itself, and say how to fix it */
+  ok("the page guards against a stale engine", /engineMissing|showStale/.test(html));
+  ok("the guard offers a reload", /hardreload/.test(html) && /caches\.delete/.test(html));
+  ok("the app prints its own build stamp", new RegExp('APP_VERSION = "' + version.replace(/\./g, "\\.") + '"').test(html), version);
+
+  var landing = fs.readFileSync(path.join(root, "docs", "index.html"), "utf8");
+  ok("the landing page's build stamp is this release",
+    new RegExp('var BUILD = "' + version.replace(/\./g, "\\.")).test(landing), version);
+  ok("the landing page tags the engine it loads",
+    new RegExp('play/panchang\\.js\\?v=' + version.replace(/\./g, "\\.")).test(landing));
+
+  var manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.webmanifest"), "utf8"));
+  ok("the manifest still points at the app", manifest.start_url === "./" || manifest.start_url === "index.html");
+})();
+
+/* ---- 27. every label the page marks for translation has a translation ----
+ * A Gujarati reader should not meet an English button. The page tags its chrome
+ * with data-i18n; this checks each tag against the three tables.
+ */
+(function () {
+  var html = fs.readFileSync(path.join(__dirname, "docs", "play", "index.html"), "utf8");
+
+  /* pull the two dictionaries out of the script by matching braces */
+  function objectAfter(src, marker) {
+    var i = src.indexOf(marker);
+    if (i < 0) return null;
+    var open = src.indexOf("{", i), depth = 0, j;
+    for (j = open; j < src.length; j++) {
+      if (src[j] === "{") depth++;
+      else if (src[j] === "}") { depth--; if (depth === 0) break; }
+    }
+    /* it is a JS object literal, not JSON: evaluate it in an empty context */
+    var literal = src.slice(open, j + 1);
+    return new (require("vm").Script)("(" + literal + ")").runInNewContext({});
+  }
+  var L = objectAfter(html, "var L = {");
+  var MORE = objectAfter(html, "var MORE = ");
+  ok("the page's label tables were found", !!L && !!MORE);
+
+  var langs = ["en", "hi", "gu"];
+  var keys = {};
+  langs.forEach(function (lg) {
+    var all = {};
+    [L, MORE].forEach(function (t) { if (t && t[lg]) Object.keys(t[lg]).forEach(function (k) { all[k] = 1; }); });
+    keys[lg] = all;
+  });
+
+  var tagged = [], m, re = /data-i18n="([^"]+)"/g;
+  while ((m = re.exec(html))) tagged.push(m[1]);
+  ok("the page marks its chrome for translation", tagged.length >= 20, tagged.length + " tags");
+
+  var missing = [];
+  tagged.forEach(function (k) {
+    langs.forEach(function (lg) { if (!keys[lg][k]) missing.push(lg + ":" + k); });
+  });
+  ok("every tagged label exists in all three languages", missing.length === 0, missing.slice(0, 6).join(" "));
+
+  var enKeys = Object.keys(keys.en);
+  ok("the three tables carry the same keys",
+    enKeys.every(function (k) { return keys.hi[k] && keys.gu[k]; }),
+    enKeys.filter(function (k) { return !keys.hi[k] || !keys.gu[k]; }).slice(0, 6).join(" "));
+  ok("no translation is an empty string",
+    enKeys.every(function (k) { return keys.hi[k] && keys.gu[k]; }));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

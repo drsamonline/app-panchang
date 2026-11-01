@@ -2,7 +2,7 @@
 
 <p>
   <a href="https://drsamonline.github.io/app-panchang/"><img alt="live: online" src="docs/assets/badge-live.svg"></a>
-  <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img alt="tests: 182 passing" src="docs/assets/badge-tests.svg"></a>
+  <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img alt="tests: 199 passing" src="docs/assets/badge-tests.svg"></a>
   <a href="https://github.com/drsamonline/app-panchang/actions/workflows/build-apps.yml"><img alt="build: green" src="docs/assets/badge-build.svg"></a>
   <a href="LICENSE"><img alt="licence: PolyForm NC 1.0.0" src="docs/assets/badge-licence.svg"></a>
   <img alt="offline: no network" src="docs/assets/badge-offline.svg">
@@ -46,7 +46,7 @@ Every day is addressable, so a panchang can be linked or shared:
 
 | | |
 |---|---|
-| headless assertions, `node test-node.js` | **182 passing, 0 failed** |
+| headless assertions, `node test-node.js` | **199 passing, 0 failed** |
 | runtime dependencies | **0** — two in-repo scripts and three data files |
 | sun–moon elongation vs an independent ephemeris | **better than 0.05°** |
 | limb boundary accuracy | **a minute or two**, stated rather than hidden |
@@ -64,6 +64,9 @@ Every day is addressable, so a panchang can be linked or shared:
   are generated in this repository.
 - **No geocoder.** The city list is a data file. Reverse geocoding offline is not possible without
   a dataset this app should not carry, so "use my location" snaps to the nearest bundled city.
+- **No silently stale page.** Every asset is version-tagged and the service worker's
+  cache is named after the release, so a new page cannot pair with an old engine; if it
+  somehow does, the page says so and offers a reload instead of sitting there frozen.
 - **No silent precision.** Lunar longitude from a reduced series puts a tithi or nakshatra boundary
   within a minute or two of time, and local tradition differs on ayanamsa and on where a day
   begins. The day can be read at noon (default), sunrise, or midnight — the app says which.
@@ -103,7 +106,7 @@ unresolvable and looks for the day's tithi in the DOM.
 
 ```bash
 open docs/play/index.html      # the whole app, no install
-node test-node.js              # 182 passed, 0 failed
+node test-node.js              # 199 passed, 0 failed
 node scripts/offline-check.js  # renders with no network (skips if no browser)
 ```
 

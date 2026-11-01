@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.2.1 — 2026-11-01
+
+### The language selector did nothing
+
+It did, on a clean browser. On a browser that had opened 0.1.2 the page was **frozen**: the
+service worker served the new `index.html` beside the **old `panchang.js`** out of a cache named
+after the previous release, `render()` threw on an API the old engine does not have, and the
+first thing a reader tried — changing the language — appeared to do nothing at all. The page had
+died before it could respond, and said nothing about it.
+
+Three fixes, because one is not enough:
+
+- **Every asset is version-tagged** (`panchang.js?v=0.2.1`, and the same for the runtime, the
+  data files and the manifest). A cache-first worker matches on the URL, so a release that
+  changes the URL cannot be served from the old entry.
+- **The worker's cache name comes from one `VERSION` constant**, alongside the precache list, so
+  the two can no longer drift.
+- **The page checks the engine it got.** If the cached engine is older than the page, a banner
+  says which API is missing and offers a button that clears the caches, unregisters the worker
+  and reloads. A new worker taking over reloads the page once per session.
+
+### The rest of the audit
+
+- The **landing page's build stamp** still said 0.1.2 and it loaded an untagged `panchang.js` —
+  the same staleness bug, on the page that is meant to prove the app works.
+- The **"Offset used" field** was editable and ignored: the offset is derived from the zone for
+  the chosen date. It is now read-only and says so.
+- **High contrast** had CSS but no control. There is a button, and it is remembered.
+- Test counts in the README and the landing page had drifted from the suite; the badge now reads
+  the suite's own output, and the prose matches it.
+- `194 assertions`: nine new ones hold the version together — every script and manifest tagged
+  with the release, the worker's `VERSION` matching `VERSION`, the stale-engine guard present,
+  the reload path present, and both build stamps current.
+
 ## 0.2.0 — 2026-11-01
 
 The enhancement list in `ENHANCEMENTS.md`, worked through. The app went from "which tithi is

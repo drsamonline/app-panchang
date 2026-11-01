@@ -6,7 +6,7 @@
 <title>Panchang — the daily Indian almanac</title>
 <meta name="description" content="An offline daily Panchang: tithi, nakshatra, yoga, karana with the times they change, sunrise and sunset, moonrise, rahu-kaal, choghadiya, hora, samvat and muhurat — computed on your device, no network.">
 <meta name="theme-color" content="#150c0a">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest?v=0.2.1">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
   :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e;--warn:#e0a33e;--bad:#e07a5f}
@@ -75,7 +75,7 @@
 <body>
 <header>
   <h1>Panchang</h1>
-  <p class="muted" style="margin:0 0 12px">The daily Indian almanac — computed on your device.</p>
+  <p class="muted" style="margin:0 0 12px" data-i18n="subtitle">The daily Indian almanac — computed on your device.</p>
   <div class="row noprint">
     <div><label for="date" data-i18n="lblDate">Date</label><input id="date" type="date"></div>
     <div><label for="place" data-i18n="lblPlace">Place</label><input id="place" type="search" list="citylist" placeholder="Search a city" autocomplete="off"></div>
@@ -92,32 +92,34 @@
         <div><label for="lat" data-i18n="lblLat">Latitude</label><input id="lat" type="number" step="0.0001" value="19.0760" style="width:120px"></div>
         <div><label for="lng" data-i18n="lblLng">Longitude</label><input id="lng" type="number" step="0.0001" value="72.8777" style="width:120px"></div>
         <div><label for="zone" data-i18n="lblZone">Time zone</label><input id="zone" type="text" value="Asia/Kolkata" style="width:170px"></div>
-        <div><label for="tz" data-i18n="lblOffset">Offset used</label><input id="tz" type="number" step="0.25" value="5.5" style="width:90px"></div>
+        <div><label for="tz" data-i18n="lblOffset">Offset used</label><input id="tz" type="number" step="0.25" value="5.5" style="width:90px" readonly
+               title="Derived from the time zone above, for this date. Daylight saving included."></div>
       </div>
       <div class="row" style="margin-top:12px">
         <div><label for="at" data-i18n="lblAt">The day is read at</label>
           <select id="at">
-            <option value="noon">Local noon (default)</option>
-            <option value="sunrise">Sunrise (traditional)</option>
-            <option value="midnight">Midnight</option>
+            <option value="noon" data-i18n="atNoon">Local noon (default)</option>
+            <option value="sunrise" data-i18n="atSunrise">Sunrise (traditional)</option>
+            <option value="midnight" data-i18n="atMidnight">Midnight</option>
           </select>
         </div>
         <div><label for="lang" data-i18n="lblLang">Language</label>
           <select id="lang"><option value="en">English</option><option value="hi">हिन्दी</option><option value="gu">ગુજરાતી</option></select>
         </div>
         <div><label for="numerals" data-i18n="lblDigits">Digits</label>
-          <select id="numerals"><option value="latin">0 1 2 3</option><option value="native">Native</option></select>
+          <select id="numerals"><option value="latin">0 1 2 3</option><option value="native" data-i18n="numNative">Native</option></select>
         </div>
         <div><label for="scale" data-i18n="lblScale">Text size</label>
-          <select id="scale"><option value="md">Normal</option><option value="lg">Large</option><option value="xl">Largest</option></select>
+          <select id="scale"><option value="md" data-i18n="scaleMd">Normal</option><option value="lg" data-i18n="scaleLg">Large</option><option value="xl" data-i18n="scaleXl">Largest</option></select>
         </div>
       </div>
       <div class="row" style="margin-top:12px">
-        <button id="saveplace" class="ghost small">Save this place</button>
-        <button id="jsonout" class="ghost small">Export settings (JSON)</button>
-        <button id="jsonin" class="ghost small">Import settings</button>
-        <button id="print" class="ghost small">Print this day</button>
-        <button id="theme" class="ghost small">Toggle theme</button>
+        <button id="saveplace" class="ghost small" data-i18n="btnSavePlace">Save this place</button>
+        <button id="jsonout" class="ghost small" data-i18n="btnJsonOut">Export settings (JSON)</button>
+        <button id="jsonin" class="ghost small" data-i18n="btnJsonIn">Import settings</button>
+        <button id="print" class="ghost small" data-i18n="btnPrint">Print this day</button>
+        <button id="theme" class="ghost small" data-i18n="btnTheme">Toggle theme</button>
+        <button id="contrast" class="ghost small" data-i18n="btnContrast">High contrast</button>
         <button id="install" class="ghost small" hidden>Install this app</button>
       </div>
       <div id="places" style="margin-top:12px"></div>
@@ -144,8 +146,8 @@
 
   <h2 data-i18n="headChog">Choghadiya</h2>
   <div class="two">
-    <div><div class="card"><div class="k">Day · sunrise to sunset</div><div id="chogday" style="margin-top:8px"></div></div></div>
-    <div><div class="card"><div class="k">Night · sunset to sunrise</div><div id="chognight" style="margin-top:8px"></div></div></div>
+    <div><div class="card"><div class="k" data-i18n="chogDay">Day · sunrise to sunset</div><div id="chogday" style="margin-top:8px"></div></div></div>
+    <div><div class="card"><div class="k" data-i18n="chogNight">Night · sunset to sunrise</div><div id="chognight" style="margin-top:8px"></div></div></div>
   </div>
 
   <h2 data-i18n="headHora">Hora</h2>
@@ -158,32 +160,38 @@
   <div class="card"><div id="festivals" class="muted">—</div></div>
 
   <h2 data-i18n="headMuhurat">Muhurat finder</h2>
-  <p class="muted" style="margin:0 0 8px">A favourable tithi with a favourable nakshatra, no bhadra, in the next sixty days.</p>
-  <button id="muhurat" class="noprint">Find muhurats</button>
+  <p class="muted" style="margin:0 0 8px" data-i18n="muhuratNote">A favourable tithi with a favourable nakshatra, no bhadra, in the next sixty days.</p>
+  <button id="muhurat" class="noprint" data-i18n="btnMuhurat">Find muhurats</button>
   <div id="muhurat-out" class="tiles wide" style="margin-top:10px"></div>
 
   <h2 data-i18n="headData">Data</h2>
   <div class="row noprint">
-    <button id="csv" class="ghost">Export this month (CSV)</button>
-    <button id="ics" class="ghost">Export festivals and muhurats (ICS)</button>
+    <button id="csv" class="ghost" data-i18n="btnCsv">Export this month (CSV)</button>
+    <button id="ics" class="ghost" data-i18n="btnIcs">Export festivals and muhurats (ICS)</button>
   </div>
-  <p class="muted" style="font-size:12.5px;margin-top:10px">CSV opens in a spreadsheet; ICS opens in whatever calendar is on your phone. Both are made on the device and downloaded — nothing is uploaded.</p>
+  <p class="muted" style="font-size:12.5px;margin-top:10px" data-i18n="dataNote">CSV opens in a spreadsheet; ICS opens in whatever calendar is on your phone. Both are made on the device and downloaded — nothing is uploaded.</p>
 </main>
 
 <footer class="muted">
-  Computed offline from your date and your place. Method: Meeus solar and lunar longitudes with ΔT, a Lahiri ayanamsa, the standard rise/set equations — a first pass, accurate to a minute or two at a limb boundary; verify against a printed panchang for your city before ritual use.
+  <span data-i18n="footerNote">Computed offline from your date and your place. Method: Meeus solar and lunar longitudes with ΔT, a Lahiri ayanamsa, the standard rise/set equations — a first pass, accurate to a minute or two at a limb boundary; verify against a printed panchang for your city before ritual use.</span>
   <br><span id="buildstamp"></span>
 </footer>
 
+<div id="stale" hidden role="alert" style="max-width:880px;margin:14px auto 0;padding:13px 16px;
+     border:1px solid var(--warn);border-radius:12px;background:rgba(224,163,62,.12);font-size:14px">
+  <strong>This page is running an older copy of the engine from the browser cache.</strong>
+  <span id="stalewhy" class="muted"></span>
+  <button id="hardreload" class="small" style="margin-left:8px">Reload the new version</button>
+</div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="loom-live" class="sr-only" aria-live="polite" style="position:absolute;left:-9999px"></div>
 <input type="file" id="filein" accept="application/json" hidden>
 
-<script src="web-kit.js"></script>
-<script src="data/names.js"></script>
-<script src="data/cities.js"></script>
-<script src="data/festivals.js"></script>
-<script src="panchang.js"></script>
+<script src="web-kit.js?v=0.2.1"></script>
+<script src="data/names.js?v=0.2.1"></script>
+<script src="data/cities.js?v=0.2.1"></script>
+<script src="data/festivals.js?v=0.2.1"></script>
+<script src="panchang.js?v=0.2.1"></script>
 <script>
 (function () {
   "use strict";
@@ -235,7 +243,7 @@
       norise:"આજે ઉદય નથી", noSet:"આજે અસ્ત નથી" }
   };
   function obs(k) { return (OBS[lang] && OBS[lang][k]) || OBS.en[k] || k; }
-  var MORE = {"en": {"headLimbs": "The five limbs, and when they change", "headTimes": "The day's times", "headWindows": "Windows to avoid, and the one to keep", "headChog": "Choghadiya", "headHora": "Hora", "headMonth": "The month, and the years", "headFest": "Festivals ahead", "headMuhurat": "Muhurat finder", "headData": "Data", "colName": "Name", "colFrom": "From", "colTo": "To", "chogDay": "Day · sunrise to sunset", "chogNight": "Night · sunset to sunrise", "pada": "pada", "muhurtaUnit": "muhurat", "hourUnit": "h", "lblSettings": "Place, settings and data", "lblDate": "Date", "lblPlace": "Place", "lblGeo": "Use my location", "lblToday": "Today", "lblLat": "Latitude", "lblLng": "Longitude", "lblZone": "Time zone", "lblOffset": "Offset used", "lblAt": "The day is read at", "lblLang": "Language", "lblDigits": "Digits", "lblScale": "Text size", "ph0": "New moon", "ph1": "Waxing crescent", "ph2": "First quarter", "ph3": "Waxing gibbous", "ph4": "Full moon", "ph5": "Waning gibbous", "ph6": "Last quarter", "ph7": "Waning crescent"}, "hi": {"headLimbs": "पंचांग के पाँच अंग, और उनका बदलाव", "headTimes": "दिन के समय", "headWindows": "अशुभ काल, और एक शुभ", "headChog": "चौघड़िया", "headHora": "होरा", "headMonth": "मास और संवत", "headFest": "आने वाले त्योहार", "headMuhurat": "मुहूर्त खोज", "headData": "डेटा", "colName": "नाम", "colFrom": "से", "colTo": "तक", "chogDay": "दिन · सूर्योदय से सूर्यास्त", "chogNight": "रात · सूर्यास्त से सूर्योदय", "pada": "चरण", "muhurtaUnit": "मुहूर्त", "hourUnit": "घं", "lblSettings": "स्थान, सेटिंग और डेटा", "lblDate": "दिनांक", "lblPlace": "स्थान", "lblGeo": "मेरा स्थान", "lblToday": "आज", "lblLat": "अक्षांश", "lblLng": "देशांतर", "lblZone": "समय क्षेत्र", "lblOffset": "प्रयुक्त अंतर", "lblAt": "दिन पढ़ा जाता है", "lblLang": "भाषा", "lblDigits": "अंक", "lblScale": "अक्षर आकार", "ph0": "नवचंद्र", "ph1": "बढ़ता चंद्र", "ph2": "अर्धचंद्र", "ph3": "पूर्ण के निकट", "ph4": "पूर्णिमा", "ph5": "घटता चंद्र", "ph6": "कृष्ण अर्धचंद्र", "ph7": "क्षीण चंद्र"}, "gu": {"headLimbs": "પંચાંગના પાંચ અંગ, અને તેમનો બદલાવ", "headTimes": "દિવસના સમય", "headWindows": "અશુભ કાળ, અને એક શુભ", "headChog": "ચોઘડિયા", "headHora": "હોરા", "headMonth": "માસ અને સંવત", "headFest": "આવતા તહેવારો", "headMuhurat": "મુહૂર્ત શોધ", "headData": "ડેટા", "colName": "નામ", "colFrom": "થી", "colTo": "સુધી", "chogDay": "દિવસ · સૂર્યોદયથી સૂર્યાસ્ત", "chogNight": "રાત · સૂર્યાસ્તથી સૂર્યોદય", "pada": "ચરણ", "muhurtaUnit": "મુહૂર્ત", "hourUnit": "કલાક", "lblSettings": "સ્થળ, સેટિંગ અને ડેટા", "lblDate": "તારીખ", "lblPlace": "સ્થળ", "lblGeo": "મારું સ્થળ", "lblToday": "આજે", "lblLat": "અક્ષાંશ", "lblLng": "રેખાંશ", "lblZone": "સમય ક્ષેત્ર", "lblOffset": "વપરાયેલ તફાવત", "lblAt": "દિવસ વાંચવામાં આવે છે", "lblLang": "ભાષા", "lblDigits": "અંક", "lblScale": "અક્ષર કદ", "ph0": "નવચંદ્ર", "ph1": "વધતો ચંદ્ર", "ph2": "અડધો ચંદ્ર", "ph3": "પૂર્ણની નજીક", "ph4": "પૂર્ણિમા", "ph5": "ઘટતો ચંદ્ર", "ph6": "કૃષ્ણ અડધો ચંદ્ર", "ph7": "ક્ષીણ ચંદ્ર"}};
+  var MORE = {"en": {"headLimbs": "The five limbs, and when they change", "headTimes": "The day's times", "headWindows": "Windows to avoid, and the one to keep", "headChog": "Choghadiya", "headHora": "Hora", "headMonth": "The month, and the years", "headFest": "Festivals ahead", "headMuhurat": "Muhurat finder", "headData": "Data", "colName": "Name", "colFrom": "From", "colTo": "To", "chogDay": "Day · sunrise to sunset", "chogNight": "Night · sunset to sunrise", "pada": "pada", "muhurtaUnit": "muhurat", "hourUnit": "h", "lblSettings": "Place, settings and data", "lblDate": "Date", "lblPlace": "Place", "lblGeo": "Use my location", "lblToday": "Today", "lblLat": "Latitude", "lblLng": "Longitude", "lblZone": "Time zone", "lblOffset": "Offset used", "lblAt": "The day is read at", "lblLang": "Language", "lblDigits": "Digits", "lblScale": "Text size", "ph0": "New moon", "ph1": "Waxing crescent", "ph2": "First quarter", "ph3": "Waxing gibbous", "ph4": "Full moon", "ph5": "Waning gibbous", "ph6": "Last quarter", "ph7": "Waning crescent", "btnSavePlace": "Save this place", "btnJsonOut": "Export settings (JSON)", "btnJsonIn": "Import settings", "btnPrint": "Print this day", "btnTheme": "Toggle theme", "btnContrast": "High contrast", "btnContrastOff": "Normal contrast", "noPlaces": "No saved places yet.", "muhuratNote": "A favourable tithi with a favourable nakshatra, no bhadra, in the next sixty days.", "dataNote": "CSV opens in a spreadsheet; ICS opens in whatever calendar is on your phone. Both are made on the device and downloaded — nothing is uploaded.", "btnCsv": "Export this month (CSV)", "btnIcs": "Export festivals and muhurats (ICS)", "btnMuhurat": "Find muhurats", "subtitle": "The daily Indian almanac — computed on your device.", "footerNote": "Computed offline from your date and your place. Method: Meeus solar and lunar longitudes with ΔT, a Lahiri ayanamsa, the standard rise/set equations — a first pass, accurate to a minute or two at a limb boundary; verify against a printed panchang for your city before ritual use.", "atNoon": "Local noon (default)", "atSunrise": "Sunrise (traditional)", "atMidnight": "Midnight", "scaleMd": "Normal", "scaleLg": "Large", "scaleXl": "Largest", "numLatin": "0 1 2 3", "numNative": "Native digits"}, "hi": {"headLimbs": "पंचांग के पाँच अंग, और उनका बदलाव", "headTimes": "दिन के समय", "headWindows": "अशुभ काल, और एक शुभ", "headChog": "चौघड़िया", "headHora": "होरा", "headMonth": "मास और संवत", "headFest": "आने वाले त्योहार", "headMuhurat": "मुहूर्त खोज", "headData": "डेटा", "colName": "नाम", "colFrom": "से", "colTo": "तक", "chogDay": "दिन · सूर्योदय से सूर्यास्त", "chogNight": "रात · सूर्यास्त से सूर्योदय", "pada": "चरण", "muhurtaUnit": "मुहूर्त", "hourUnit": "घं", "lblSettings": "स्थान, सेटिंग और डेटा", "lblDate": "दिनांक", "lblPlace": "स्थान", "lblGeo": "मेरा स्थान", "lblToday": "आज", "lblLat": "अक्षांश", "lblLng": "देशांतर", "lblZone": "समय क्षेत्र", "lblOffset": "प्रयुक्त अंतर", "lblAt": "दिन पढ़ा जाता है", "lblLang": "भाषा", "lblDigits": "अंक", "lblScale": "अक्षर आकार", "ph0": "नवचंद्र", "ph1": "बढ़ता चंद्र", "ph2": "अर्धचंद्र", "ph3": "पूर्ण के निकट", "ph4": "पूर्णिमा", "ph5": "घटता चंद्र", "ph6": "कृष्ण अर्धचंद्र", "ph7": "क्षीण चंद्र", "btnSavePlace": "यह स्थान सहेजें", "btnJsonOut": "सेटिंग निर्यात (JSON)", "btnJsonIn": "सेटिंग आयात", "btnPrint": "यह दिन छापें", "btnTheme": "थीम बदलें", "btnContrast": "उच्च कंट्रास्ट", "btnContrastOff": "सामान्य कंट्रास्ट", "noPlaces": "अभी कोई स्थान सहेजा नहीं गया।", "muhuratNote": "अगले साठ दिनों में शुभ तिथि और शुभ नक्षत्र, भद्रा रहित।", "dataNote": "CSV स्प्रेडशीट में खुलता है; ICS आपके फ़ोन के कैलेंडर में। दोनों डिवाइस पर बनते हैं और डाउनलोड होते हैं — कुछ भी अपलोड नहीं होता।", "btnCsv": "इस माह का निर्यात (CSV)", "btnIcs": "त्योहार और मुहूर्त निर्यात (ICS)", "btnMuhurat": "मुहूर्त खोजें", "subtitle": "दैनिक भारतीय पंचांग — आपके डिवाइस पर गणना।", "footerNote": "आपकी तिथि और स्थान से, ऑफ़लाइन गणना। विधि: ΔT सहित मीयस के सौर-चांद्र देशांतर, लाहिरी अयनांश, मानक उदय/अस्त समीकरण — प्रथम पास, तिथि-सीमा पर एक-दो मिनट तक सटीक; कर्मकांड से पहले अपने शहर का छपा पंचांग देख लें।", "atNoon": "स्थानीय मध्याह्न (डिफ़ॉल्ट)", "atSunrise": "सूर्योदय (परंपरागत)", "atMidnight": "मध्यरात्रि", "scaleMd": "सामान्य", "scaleLg": "बड़ा", "scaleXl": "सबसे बड़ा", "numLatin": "0 1 2 3", "numNative": "देवनागरी अंक"}, "gu": {"headLimbs": "પંચાંગના પાંચ અંગ, અને તેમનો બદલાવ", "headTimes": "દિવસના સમય", "headWindows": "અશુભ કાળ, અને એક શુભ", "headChog": "ચોઘડિયા", "headHora": "હોરા", "headMonth": "માસ અને સંવત", "headFest": "આવતા તહેવારો", "headMuhurat": "મુહૂર્ત શોધ", "headData": "ડેટા", "colName": "નામ", "colFrom": "થી", "colTo": "સુધી", "chogDay": "દિવસ · સૂર્યોદયથી સૂર્યાસ્ત", "chogNight": "રાત · સૂર્યાસ્તથી સૂર્યોદય", "pada": "ચરણ", "muhurtaUnit": "મુહૂર્ત", "hourUnit": "કલાક", "lblSettings": "સ્થળ, સેટિંગ અને ડેટા", "lblDate": "તારીખ", "lblPlace": "સ્થળ", "lblGeo": "મારું સ્થળ", "lblToday": "આજે", "lblLat": "અક્ષાંશ", "lblLng": "રેખાંશ", "lblZone": "સમય ક્ષેત્ર", "lblOffset": "વપરાયેલ તફાવત", "lblAt": "દિવસ વાંચવામાં આવે છે", "lblLang": "ભાષા", "lblDigits": "અંક", "lblScale": "અક્ષર કદ", "ph0": "નવચંદ્ર", "ph1": "વધતો ચંદ્ર", "ph2": "અડધો ચંદ્ર", "ph3": "પૂર્ણની નજીક", "ph4": "પૂર્ણિમા", "ph5": "ઘટતો ચંદ્ર", "ph6": "કૃષ્ણ અડધો ચંદ્ર", "ph7": "ક્ષીણ ચંદ્ર", "btnSavePlace": "આ સ્થળ સાચવો", "btnJsonOut": "સેટિંગ નિકાસ (JSON)", "btnJsonIn": "સેટિંગ આયાત", "btnPrint": "આ દિવસ છાપો", "btnTheme": "થીમ બદલો", "btnContrast": "ઊંચો કોન્ટ્રાસ્ટ", "btnContrastOff": "સામાન્ય કોન્ટ્રાસ્ટ", "noPlaces": "હજી કોઈ સ્થળ સાચવ્યું નથી.", "muhuratNote": "આગલા સાઠ દિવસમાં શુભ તિથિ અને શુભ નક્ષત્ર, ભદ્રા વગર.", "dataNote": "CSV સ્પ્રેડશીટમાં ખૂલે છે; ICS તમારા ફોનના કૅલેન્ડરમાં. બંને ઉપકરણ પર બને છે અને ડાઉનલોડ થાય છે — કંઈ પણ અપલોડ થતું નથી.", "btnCsv": "આ મહિનાની નિકાસ (CSV)", "btnIcs": "તહેવારો અને મુહૂર્ત નિકાસ (ICS)", "btnMuhurat": "મુહૂર્ત શોધો", "subtitle": "દૈનિક ભારતીય પંચાંગ — તમારા ઉપકરણ પર ગણતરી.", "footerNote": "તમારી તારીખ અને સ્થળ પરથી, ઑફલાઇન ગણતરી. પદ્ધતિ: ΔT સાથે મીયસના સૌર-ચાંદ્ર રેખાંશ, લાહિરી અયનાંશ, પ્રમાણભૂત ઉદય/અસ્ત સમીકરણો — પ્રથમ પાસ, તિથિ-સીમા પર એક-બે મિનિટ સુધી ચોકસાઈ; કર્મકાંડ પહેલાં તમારા શહેરનું છપાયેલું પંચાંગ જોઈ લો.", "atNoon": "સ્થાનિક મધ્યાહ્ન (ડિફૉલ્ટ)", "atSunrise": "સૂર્યોદય (પરંપરાગત)", "atMidnight": "મધ્યરાત્રિ", "scaleMd": "સામાન્ય", "scaleLg": "મોટું", "scaleXl": "સૌથી મોટું", "numLatin": "0 1 2 3", "numNative": "ગુજરાતી અંક"}};
   Object.keys(MORE).forEach(function (lg) {
     if (!L[lg]) L[lg] = {};
     Object.keys(MORE[lg]).forEach(function (k) { L[lg][k] = MORE[lg][k]; });
@@ -256,6 +264,7 @@
   }
 
   /* ---------- state ---------- */
+  var APP_VERSION = "0.2.1";
   var state = {
     date: null, lat: 19.0760, lng: 72.8777, zone: "Asia/Kolkata", tz: 5.5,
     at: "noon", scale: "md", contrast: ""
@@ -528,13 +537,20 @@
     save();
   });
   $("theme").addEventListener("click", function () { Loom.theme.toggle(); });
+  $("contrast").addEventListener("click", function () {
+    state.contrast = state.contrast === "high" ? "" : "high";
+    if (state.contrast) document.documentElement.setAttribute("data-contrast", "high");
+    else document.documentElement.removeAttribute("data-contrast");
+    $("contrast").textContent = state.contrast ? t("btnContrastOff") : t("btnContrast");
+    save();
+  });
   $("print").addEventListener("click", function () { window.print(); });
 
   /* saved places */
   function renderPlaces() {
     var list = Loom.storage.get("panchang.places", []);
     var box = $("places");
-    if (!list.length) { box.innerHTML = '<span class="muted">No saved places yet.</span>'; return; }
+    if (!list.length) { box.innerHTML = '<span class="muted">' + t("noPlaces") + "</span>"; return; }
     box.innerHTML = list.map(function (c, i) {
       return '<button class="ghost small" data-i="' + i + '">' + c.name + " · " + c.lat + ", " + c.lng + "</button>";
     }).join(" ");
@@ -711,6 +727,44 @@
     try { history.replaceState(null, "", "#" + q.join("&")); } catch (e) { /* file:// */ }
   }
 
+  /* ---------- is the engine the one this page was built against? ----------
+   * A cache-first service worker can serve an older panchang.js to a returning
+   * reader while the HTML is new. The page then throws on an API that is not
+   * there and looks frozen - which is exactly what a reader reports as "the
+   * buttons do nothing". Say so, and offer the fix, instead of dying quietly.
+   */
+  var NEEDED = ["compute", "findMuhurat", "festivalsIn", "monthTable", "limbWindow",
+    "lunarMonth", "zoneOffset", "tithiAt", "karanaName", "tables"];
+  function engineMissing() {
+    if (!window.Panchang) return "the engine did not load at all";
+    for (var i = 0; i < NEEDED.length; i++) {
+      if (Panchang[NEEDED[i]] === undefined) return "the cached engine has no " + NEEDED[i] + "()";
+    }
+    var tb = Panchang.tables || {};
+    if (!tb.choghadiya || tb.choghadiya.length !== 7) return "the cached engine has no choghadiya table";
+    if (!tb.masa || tb.masa.length !== 12) return "the cached engine has no month table";
+    return null;
+  }
+  function hardReload() {
+    function done() { location.reload(); }
+    if (!("caches" in window)) return done();
+    caches.keys()
+      .then(function (keys) { return Promise.all(keys.map(function (k) { return caches.delete(k); })); })
+      .then(function () {
+        return (navigator.serviceWorker && navigator.serviceWorker.getRegistrations)
+          ? navigator.serviceWorker.getRegistrations() : [];
+      })
+      .then(function (rs) { return Promise.all((rs || []).map(function (r) { return r.unregister(); })); })
+      .then(done, done);
+  }
+  function showStale(why) {
+    var box = $("stale");
+    if (!box) return;
+    $("stalewhy").textContent = why ? "(" + why + ")" : "";
+    box.hidden = false;
+    $("hardreload").addEventListener("click", hardReload);
+  }
+
   /* ---------- boot ---------- */
   function applyUI() {
     $("date").value = state.date;
@@ -734,15 +788,30 @@
   applyUI();
   translateUI();
   renderPlaces();
-  try {
-    $("buildstamp").textContent = "build 0.2.0 · engine " + Panchang.version +
-      " · " + CITIES.length + " cities bundled";
-  } catch (e) {}
-  render();
+  var missing = engineMissing();
+  if (missing) {
+    showStale(missing);
+  } else {
+    try {
+      $("buildstamp").textContent = "build 0.2.1 · engine " + Panchang.version +
+        " · " + CITIES.length + " cities bundled";
+    } catch (e) {}
+    try { render(); }
+    catch (err) { showStale("the day could not be drawn: " + (err && err.message)); }
+  }
   window.addEventListener("hashchange", function () { if (applyHash()) { applyUI(); render(); } });
 
-  /* offline: the HTML network-first, the assets cache-first, cache bumped per release */
+  /* offline: the HTML network-first, the assets cache-first, cache bumped per release.
+   * When a new worker takes over, reload once so the page and the engine agree -
+   * at most once per session, so a worker that keeps changing cannot loop. */
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    var reloaded = false;
+    try { reloaded = sessionStorage.getItem("panchang.reloaded") === "1"; } catch (e) {}
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (reloaded) return;
+      try { sessionStorage.setItem("panchang.reloaded", "1"); } catch (e) {}
+      location.reload();
+    });
     navigator.serviceWorker.register("sw.js").then(function (reg) {
       if (reg && reg.update) reg.update();
     }).catch(function () { /* file:// or an unsupported browser: the app still works */ });

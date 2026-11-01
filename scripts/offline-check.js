@@ -49,8 +49,9 @@ function ok(name, cond, extra) {
 var hero = (out.match(/id="hero"[^>]*>([^<]*)</) || [])[1] || "";
 ok("the page rendered its hero with no network", hero.length > 3 && hero !== "—", JSON.stringify(hero));
 
-var limbs = (out.match(/id="limbs"[\s\S]{0,4000}?<\/section>/) || [out])[0];
-ok("the five limbs rendered", /class="v"/.test(out) && out.indexOf('id="limbs"') !== -1);
+/* the day's cards live in #grid, the container the app has always had */
+var cards = (out.match(/class="v"/g) || []).length;
+ok("the day's cards rendered", out.indexOf('id="grid"') !== -1 && cards >= 8, cards + " cards");
 ok("a sunrise time rendered", /\d{2}:\d{2}/.test(out));
 ok("the build stamp rendered", /build \d+\.\d+\.\d+/.test(out));
 ok("no script error was recorded", out.indexOf("__bootError") === -1 || out.indexOf("__bootError") === undefined);

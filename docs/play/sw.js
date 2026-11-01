@@ -6,21 +6,24 @@
  * cache-first with a background refresh, which is safe — a changed asset
  * arrives with a changed build.
  *
- * BUMP `CACHE` on every release. The app prints its build stamp in the footer,
- * so "am I on the new one?" is answerable from the page itself.
+ * BUMP `VERSION` on every release - it drives both the cache name and the
+ * query on every asset, so a stale entry cannot be matched by a new page. The
+ * app prints its build stamp in the footer, and shows a banner if the engine it
+ * loaded is older than the page, so "am I on the new one?" is answerable.
  */
 "use strict";
 
-var CACHE = "panchang-0.2.0";
+var VERSION = "0.2.1";
+var CACHE = "panchang-" + VERSION;
 var ASSETS = [
   "./",
   "./index.html",
-  "./web-kit.js",
-  "./panchang.js",
-  "./data/names.js",
-  "./data/cities.js",
-  "./data/festivals.js",
-  "./manifest.webmanifest",
+  "./web-kit.js?v=" + VERSION,
+  "./panchang.js?v=" + VERSION,
+  "./data/names.js?v=" + VERSION,
+  "./data/cities.js?v=" + VERSION,
+  "./data/festivals.js?v=" + VERSION,
+  "./manifest.webmanifest?v=" + VERSION,
   "./icon.svg"
 ];
 
