@@ -9,11 +9,11 @@
 <link rel="manifest" href="manifest.webmanifest?v=0.2.2">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
-  :root{--bg:#0f1115;--card:#171a21;--ink:#e7e9ee;--mut:#9aa3b2;--line:#252a34;--acc:#22c55e;--warn:#e0a33e;--bad:#e07a5f}
+  :root{--bg:#f2f4fa;--card:#ffffff;--ink:#101728;--mut:#55617d;--line:#dce2f0;--acc:#a97b1e;--warn:#b07d1a;--bad:#b4442f}
   *{box-sizing:border-box}
   html{font-size:16px}
   body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  header,main,footer{max-width:880px;margin:0 auto;padding:18px}
+  header,main,footer{max-width:1080px;margin:0 auto;padding:18px}
   h1{margin:0 0 2px;font-size:24px}
   h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:26px 0 9px}
   .muted{color:var(--mut)}
@@ -60,6 +60,8 @@
   html[data-scale="lg"]{font-size:18.5px}
   html[data-scale="xl"]{font-size:21px}
   @media (max-width:640px){ .two{grid-template-columns:1fr} }
+  /* five limbs, five columns: a 4+1 wrap looks like a mistake */
+  @media (min-width:1000px){ #grid.tiles.wide{grid-template-columns:repeat(5,1fr)} }
   @media print{
     :root{--bg:#fff;--card:#fff;--ink:#000;--mut:#333;--line:#bbb;--acc:#000}
     body{background:#fff;color:#000}
@@ -144,8 +146,8 @@
                  line-height:1;background:transparent;border:1px solid var(--line,CanvasText);
                  border-radius:.4rem;padding:.2rem .5rem;cursor:pointer;color:inherit}
 </style>
-<button class="support-open" type="button" id="support-open"
-        aria-haspopup="dialog" aria-controls="support-dialog">Support</button>
+<div style="display:flex;justify-content:flex-end;margin:6px 0 0"><button class="support-open" type="button" id="support-open"
+        aria-haspopup="dialog" aria-controls="support-dialog">Support</button></div>
 <dialog class="support-dialog" id="support-dialog" aria-label="Support this work">
   <button class="support-close" type="button" id="support-close" aria-label="Close">×</button>
   <!-- support:block:start -->
@@ -344,7 +346,7 @@
   <br><span id="buildstamp"></span>
 </footer>
 
-<div id="stale" hidden role="alert" style="max-width:880px;margin:14px auto 0;padding:13px 16px;
+<div id="stale" hidden role="alert" style="max-width:1080px;margin:14px auto 0;padding:13px 16px;
      border:1px solid var(--warn);border-radius:12px;background:rgba(224,163,62,.12);font-size:14px">
   <strong>This page is running an older copy of the engine from the browser cache.</strong>
   <span id="stalewhy" class="muted"></span>
