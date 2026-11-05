@@ -392,8 +392,14 @@ REF.forEach(function (r) {
       if (fs.statSync(full).isDirectory()) return walk(full);
       if (!/\.(html|js|webmanifest|css)$/.test(f)) return;
       var text = fs.readFileSync(full, "utf8");
-      var re = /(?:src|href)\s*=\s*["']https?:\/\/([^"'/]+)/g, m;
-      while ((m = re.exec(text))) offenders.push(path.relative(dir, full) + " -> " + m[1]);
+      // an <a href> is a link the reader may CHOOSE to follow; it loads nothing.
+      // Everything else — a src, a <link href> — is fetched by the page itself,
+      // and that is what "offline" forbids.
+      var re = /<([a-zA-Z][\w-]*)\b[^>]*?\b(src|href)\s*=\s*["']https?:\/\/([^"'/]+)/g, m;
+      while ((m = re.exec(text))) {
+        if (m[1].toLowerCase() === "a" && m[2].toLowerCase() === "href") continue;
+        offenders.push(path.relative(dir, full) + " -> " + m[1].toLowerCase() + " " + m[3]);
+      }
       if (f !== "sw.js" && /\bfetch\s*\(\s*["']https?:/.test(text)) offenders.push(f + " -> fetch()");
     });
   }
