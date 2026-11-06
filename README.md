@@ -1,5 +1,7 @@
 # Panchang
 
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
+
 <p>
   <a href="https://drsamonline.github.io/app-panchang/"><img alt="live: online" src="docs/assets/badge-live.svg"></a>
   <a href="https://github.com/drsamonline/app-panchang/actions/workflows/test.yml"><img alt="tests: 204 passing" src="docs/assets/badge-tests.svg"></a>
