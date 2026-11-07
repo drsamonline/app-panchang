@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.3 — 2026-11-05
+
+The stamp guard was red on `main`, and it was right.
+
+### The record had drifted from what shipped
+
+The 2026-11-04 sweep rewrote `docs/index.html` and `docs/play/index.html` without moving
+VERSION, so `BUILD.json` described files that no longer existed — and the `Test` workflow
+refused it on every push. VERSION, `sw.js`'s `VERSION`, `APP_VERSION` and the landing page's
+`BUILD` stamp all move to 0.2.3 together, and `BUILD.json` is re-stamped.
+
+### The offline guard refused the support block
+
+"the app loads nothing from another origin" scanned every `href`, so it counted the
+footer's `<a href="https://ko-fi.com/...">` as a cross-origin load. A link the reader may
+choose to follow loads nothing. The guard now refuses `src` and `<link href>` — what the
+page itself fetches — and allows `<a href>`.
+
 ## 0.2.2 — 2026-11-01
 
 No behaviour change. The build now refuses the bug 0.2.1 was about.
