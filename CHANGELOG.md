@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.2.3 — 2026-11-07
+
+No behaviour change. The release the support block should have been, and the test that
+measured the wrong thing.
+
+### The no-network test was reading the attribute, not the behaviour
+
+The landing page and the app page have carried the support block since 2026-11-06 — Ko-fi,
+PayPal, the Amazon store, the hub — four `<a href>` navigations. The browser fetches nothing
+until a reader clicks one, and the app still runs from `file://` with the network unplugged.
+But section 23 of `test-node.js` scanned `(src|href)=https://…`, so the moment the block landed
+the suite failed: it was flagging links, and calling them loads.
+
+It now counts the four things that actually reach the network — a `src`, a `<link href>`
+(stylesheet, manifest, preload, icon), an `@import` or `url()`, and a literal `fetch("http…")`
+— and a second assertion keeps the distinction honest: the external `<a>` links may exist, a
+`<script>` or `<link>` to another origin may not. Checked to bite: adding
+`<script src="https://cdn.example.com/x.js">` fails both.
+
+### The pages had moved and VERSION had not
+
+The same 2026-11-06 sweep edited `docs/index.html`, `docs/play/index.html` and
+`docs/play/sw.js` without a release, so `BUILD.json` was stale and the stamp guard refused
+every further stamp. 0.2.3 moves every version site together — `VERSION`, the worker's cache
+name, `APP_VERSION`, both build stamps and every `?v=` — and records the shipped files again.
+
+`node test-node.js` — 205 passed, 0 failed. `node scripts/offline-check.js` — 6 passed, 0 failed.
+
 ## 0.2.2 — 2026-11-01
 
 No behaviour change. The build now refuses the bug 0.2.1 was about.

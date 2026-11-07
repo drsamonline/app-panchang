@@ -108,7 +108,7 @@ unresolvable and looks for the day's tithi in the DOM.
 
 ```bash
 open docs/play/index.html      # the whole app, no install
-node test-node.js              # 204 passed, 0 failed
+node test-node.js              # 205 passed, 0 failed
 node scripts/offline-check.js  # renders with no network (skips if no browser)
 node scripts/stamp.js          # after a VERSION bump: record what shipped
 ```

@@ -382,7 +382,14 @@ REF.forEach(function (r) {
   ok("the app's inline script parses", parses, why);
 })();
 
-/* ---- 23. nothing is loaded from another origin, anywhere in the app ---- */
+/* ---- 23. nothing is loaded from another origin, anywhere in the app ----
+   A LOAD, not a link. The support block (Ko-fi, PayPal, the Amazon store, the hub)
+   is four <a href> navigations: the browser fetches nothing until the reader clicks,
+   so the app still works from file:// with the network unplugged. This test used to
+   scan `href` and so failed the moment the block landed on the page (2026-11-06) —
+   it was measuring the attribute, not the behaviour. It now counts the four things
+   that actually reach the network: a `src`, a `<link href>` (stylesheet, manifest,
+   preload, icon), an `@import` or `url()`, and a literal `fetch("http…")`. */
 (function () {
   var dir = path.join(__dirname, "docs", "play");
   var offenders = [];
@@ -392,13 +399,24 @@ REF.forEach(function (r) {
       if (fs.statSync(full).isDirectory()) return walk(full);
       if (!/\.(html|js|webmanifest|css)$/.test(f)) return;
       var text = fs.readFileSync(full, "utf8");
-      var re = /(?:src|href)\s*=\s*["']https?:\/\/([^"'/]+)/g, m;
-      while ((m = re.exec(text))) offenders.push(path.relative(dir, full) + " -> " + m[1]);
-      if (f !== "sw.js" && /\bfetch\s*\(\s*["']https?:/.test(text)) offenders.push(f + " -> fetch()");
+      var where = path.relative(dir, full);
+      var m;
+      var reSrc = /\bsrc\s*=\s*["']https?:\/\/([^"'/]+)/g;
+      while ((m = reSrc.exec(text))) offenders.push(where + " -> src " + m[1]);
+      var reLink = /<link\b[^>]*\bhref\s*=\s*["']https?:\/\/([^"'/]+)/gi;
+      while ((m = reLink.exec(text))) offenders.push(where + " -> link " + m[1]);
+      var reCss = /(?:@import\s+|url\()\s*["']?https?:\/\/([^"')\s]+)/g;
+      while ((m = reCss.exec(text))) offenders.push(where + " -> css " + m[1]);
+      if (f !== "sw.js" && /\bfetch\s*\(\s*["']https?:/.test(text)) offenders.push(where + " -> fetch()");
     });
   }
   walk(dir);
   ok("the app loads nothing from another origin", offenders.length === 0, offenders.join("; "));
+  /* and the links that ARE there are navigations only: an <a> with an http href
+     must not also be the page's stylesheet, script or manifest */
+  var page = fs.readFileSync(path.join(dir, "index.html"), "utf8");
+  var anchors = (page.match(/<a\b[^>]*href\s*=\s*["']https?:/g) || []).length;
+  ok("the support block is links, not loads", anchors > 0 ? !/<(?:script|link)\b[^>]*https?:/.test(page) : true, anchors + " external <a>");
 })();
 
 /* ---- 24. the offline shell covers every file the app needs ---- */
