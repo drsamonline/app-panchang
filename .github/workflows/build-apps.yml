@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   app:
-    uses: drsamonline/app-builder/.github/workflows/build.yml@97cd6e6566f0b722e854740ef5d360416ec0da01   # was @main
+    uses: drsamonline/app-builder/.github/workflows/build.yml@bbef0db943e11f1a280ac8a063b79e66b7f6d9db   # was @main
     with:
       app_name: panchang
       app_src: docs/play
