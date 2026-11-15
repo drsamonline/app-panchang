@@ -185,6 +185,9 @@
   .support-foot{margin:1.2rem 0 0;font-size:.8rem;color:var(--s-muted)}
   @media (prefers-reduced-motion:no-preference){.support-card{transition:border-color .15s ease}}
   .support-card:target,.support-card:focus-within{border-color:var(--s-accent)}
+
+/* ---- a11y: the accent takes a white label ---------------------------------- */
+.noprint{color:#ffffff!important}          /* 3.40 -> 5.02 on #15803d */
 </style>
 
 <section class="support" id="support" aria-labelledby="support-h" data-support>
