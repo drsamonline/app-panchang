@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.4 — 2026-11-18
+
+The stamp guard was red on `main` again, and again it was right.
+
+### The a11y fix shipped without moving VERSION
+
+`fbb6b7c` (2026-11-15) paired every button label with the surface it sits on, and in
+`docs/index.html` that meant a new rule for the code chip. It edited a file the browser
+fetches and left VERSION at 0.2.3, so `BUILD.json` still described the previous bytes —
+and `Test` refused every push and every PR since, including the Dependabot one that had
+nothing to do with it.
+
+VERSION, `sw.js`'s `VERSION`, the `?v=` tags, the landing page's `BUILD` stamp and
+`docs/GUIDE.md` move to 0.2.4 together, and `BUILD.json` is re-stamped. No behaviour
+change: the a11y rule is the one that shipped, now recorded.
+
 ## 0.2.3 — 2026-11-05
 
 The stamp guard was red on `main`, and it was right.
