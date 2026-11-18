@@ -13,7 +13,7 @@
  */
 "use strict";
 
-var VERSION = "0.2.3";
+var VERSION = "0.2.4";
 var CACHE = "panchang-" + VERSION;
 var ASSETS = [
   "./",
