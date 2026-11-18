@@ -1,6 +1,6 @@
 # Panchang — user guide
 
-**Version 0.2.3 · PolyForm Noncommercial 1.0.0 · 204 headless assertions, 0 runtime dependencies**
+**Version 0.2.4 · PolyForm Noncommercial 1.0.0 · 204 headless assertions, 0 runtime dependencies**
 
 Pick a date and a place — search a city, tap **Use my location**, or type coordinates. The app
 computes the day and shows, for each limb, **when it began and when it ends**:
